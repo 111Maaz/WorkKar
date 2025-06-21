@@ -42,7 +42,7 @@ Follow these instructions to set up and run the project locally.
 ### Prerequisites
 
 -   [Node.js](https://nodejs.org/) (v18 or higher recommended)
--   [bun](https://bun.sh/) (or `npm`/`yarn`)
+-   [npm](https://www.npmjs.com/) (comes with Node.js)
 -   A [Supabase](https://supabase.com/) account for the backend.
 
 ### Local Installation
@@ -55,9 +55,8 @@ Follow these instructions to set up and run the project locally.
 
 2.  **Install dependencies:**
     ```sh
-    bun install
+    npm install
     ```
-    *(Or `npm install` if you are using npm)*
 
 3.  **Set up Supabase:**
     -   Log in to your Supabase account and create a new project.
@@ -73,7 +72,7 @@ Follow these instructions to set up and run the project locally.
 
 4.  **Run the development server:**
     ```sh
-    bun run dev
+    npm run dev
     ```
 
 The application should now be running on [http://localhost:5173](http://localhost:5173).
