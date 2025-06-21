@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 98%; /* #F9FAFC */
+    --foreground: 215 25% 20%; /* #1E2A38 */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 215 25% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 20%;
+
+    --primary: 25 100% 50%; /* #FF6B00 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 100% 50%; /* #0066FF */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 220 15% 96%;
+    --accent-foreground: 220 25% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 210 100% 50%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 10% 12%; /* #121212 */
+    --foreground: 0 0% 98%; /* #FAFAFA */
+
+    --card: 222 10% 15%; /* #1E1E1E */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 222 10% 15%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 25 100% 65%; /* #FF944D */
+    --primary-foreground: 215 25% 20%;
+
+    --secondary: 210 100% 60%; /* #3399FF */
+    --secondary-foreground: 215 25% 20%;
+
+    --muted: 222 10% 20%;
+    --muted-foreground: 222 10% 60%;
+
+    --accent: 222 10% 20%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 63% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 10% 25%;
+    --input: 222 10% 25%;
+    --ring: 25 100% 65%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(90deg, rgba(13, 110, 253, 0.9) 0%, rgba(13, 110, 253, 0.7) 50%, rgba(13, 110, 253, 0.8) 100%);
+  }
+  
+  .category-card {
+    @apply flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-md transition-all hover:shadow-lg hover:-translate-y-1;
+  }
+}
+
+@layer components {
+  .animated-gradient {
+    background: linear-gradient(
+      -45deg,
+      hsl(var(--secondary) / 0.8),
+      hsl(var(--primary) / 0.6),
+      hsl(var(--secondary) / 0.5),
+      hsl(var(--primary) / 0.8)
+    );
+    background-size: 400% 400%;
+    animation: gradient-move 15s ease infinite;
+  }
+}
+
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
