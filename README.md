@@ -1,73 +1,84 @@
-# Welcome to your Lovable project
+# WorkKar: Find Local Service Professionals
 
-## Project info
+<div align="center">
+  <img src="public/WorkKar%20icon.png" alt="WorkKar Logo" width="150"/>
+</div>
 
-**URL**: https://lovable.dev/projects/3b854bb1-440a-4f05-a802-001eb42acd6d
+<p align="center">
+  A modern web application to help users find and connect with skilled and general service professionals in their local area.
+</p>
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🌟 Key Features
 
-**Use Lovable**
+-   **Service Discovery**: Browse a wide range of professionals across various categories.
+-   **Location-Based Search**: Filter professionals by their proximity to your location.
+-   **Dynamic Filtering**: Easily filter services by category and search terms.
+-   **Distance Calculation**: Instantly see how far away a professional is after providing your location.
+-   **Direct Contact Info**: View contact details to connect with professionals directly.
+-   **Responsive Design**: Fully functional and beautiful on both desktop and mobile devices.
+-   **Light & Dark Mode**: Switch between themes for your viewing comfort.
+-   **Worker Sign-up**: A streamlined form for new professionals to list their services.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3b854bb1-440a-4f05-a802-001eb42acd6d) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+-   **Frontend**: [React](https://reactjs.org/) with [Vite](https://vitejs.dev/)
+-   **Language**: [TypeScript](https://www.typescriptlang.org/)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+-   **Mapping**: [Leaflet](https://leafletjs.com/) & [React Leaflet](https://react-leaflet.js.org/)
+-   **Backend & DB**: [Supabase](https.supabase.io/) (for database storage)
+-   **Linting/Formatting**: ESLint & Prettier
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 Getting Started
 
-Follow these steps:
+Follow these instructions to set up and run the project locally.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Prerequisites
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+-   [Node.js](https://nodejs.org/) (v18 or higher recommended)
+-   [bun](https://bun.sh/) (or `npm`/`yarn`)
+-   A [Supabase](https://supabase.com/) account for the backend.
 
-# Step 3: Install the necessary dependencies.
-npm i
+### Local Installation
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+1.  **Clone the repository:**
+    ```sh
+    git clone <YOUR_GIT_URL>
+    cd wo-c-main
+    ```
 
-**Edit a file directly in GitHub**
+2.  **Install dependencies:**
+    ```sh
+    bun install
+    ```
+    *(Or `npm install` if you are using npm)*
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3.  **Set up Supabase:**
+    -   Log in to your Supabase account and create a new project.
+    -   Inside your project, go to the **SQL Editor** and run the SQL script located in `supabase/migrations/` to create the necessary tables (`workers`, `profiles`).
+    -   Navigate to **Project Settings > API**.
+    -   Find your **Project URL** and `anon` public key.
+    -   Create a new file named `WorkKar.env` by copying the example. Add your Supabase credentials to it:
+        ```
+        VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+        VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+        ```
+    > **Note:** The project's sign-up form inserts data directly into the database and does not use Supabase Auth. Make sure your Row Level Security (RLS) policies on the `workers` and `profiles` tables allow for public inserts if you have RLS enabled.
 
-**Use GitHub Codespaces**
+4.  **Run the development server:**
+    ```sh
+    bun run dev
+    ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The application should now be running on [http://localhost:5173](http://localhost:5173).
 
-## What technologies are used for this project?
+---
+## 🧹 Codebase Cleanup
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/3b854bb1-440a-4f05-a802-001eb42acd6d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+The codebase has been cleaned to remove all mentions of placeholder names and has been standardized to use the "WorkKar" branding and iconography.

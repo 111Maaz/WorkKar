@@ -13,10 +13,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <a href="/" className="flex items-center gap-3">
-              {/* Circular logo placeholder */}
-              <div className="w-10 h-10 bg-primary rounded-full border-2 border-primary flex items-center justify-center">
-                <span className="text-white font-bold text-sm">WK</span>
-              </div>
+              <img src="/WorkKar icon.png" alt="WorkKar Logo" className="w-16 h-16 rounded-full object-cover" />
               <span className="text-primary font-bold text-xl">Work<span className="text-secondary">Kar</span></span>
             </a>
           </div>
