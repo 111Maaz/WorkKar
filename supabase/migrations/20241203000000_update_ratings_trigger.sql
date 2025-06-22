@@ -18,7 +18,7 @@ BEGIN
   
   UPDATE public.workers
   SET 
-    average_rating = COALESCE(avg_rating, 0),
+    rating = COALESCE(avg_rating, 0),
     total_reviews = COALESCE(review_count, 0)
   WHERE id = COALESCE(NEW.worker_id, OLD.worker_id);
   

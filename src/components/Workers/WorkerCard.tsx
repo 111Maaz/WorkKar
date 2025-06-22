@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface WorkerCardProps {
   worker: Worker;
   className?: string;
+  userLocation: { latitude: number; longitude: number; } | null;
   onDistanceClick: () => void;
 }
 
@@ -29,7 +30,7 @@ const categoryColors: { [key: string]: string } = {
   'default': 'border-t-slate-500'
 };
 
-const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, onDistanceClick }) => {
+const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation, onDistanceClick }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -48,10 +49,12 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, onDistanceCl
     if (!user) {
       // If user is not logged in, go to auth page
       navigate('/auth');
-    } else {
-      // If user is logged in, let the parent component handle it
+    } else if (!userLocation) {
+      // If user is logged in but location is not available, let parent handle it
       onDistanceClick();
     }
+    // If userLocation is available, the distance is already shown, so this button isn't rendered.
+    // However, if logic were to change, we'd do nothing here.
   };
 
   const accentColor = categoryColors[worker.category] || categoryColors['default'];
@@ -97,7 +100,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, onDistanceCl
               <span>{`${worker.distance.toFixed(1)} km away`}</span>
             ) : (
               <button onClick={handleKnowDistanceClick} className="text-primary hover:underline font-medium text-left">
-                Know the distance
+                {userLocation ? 'Calculating...' : 'Know the distance'}
               </button>
             )}
           </div>

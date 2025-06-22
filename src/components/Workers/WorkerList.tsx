@@ -11,6 +11,7 @@ interface WorkerListProps {
   workers: Worker[];
   loading?: boolean;
   error?: boolean;
+  userLocation: { latitude: number; longitude: number; } | null;
   onRetry?: () => void;
   onClearFilters?: () => void;
   onRefresh?: () => void;
@@ -21,6 +22,7 @@ const WorkerList: React.FC<WorkerListProps> = ({
   workers, 
   loading = false, 
   error = false, 
+  userLocation,
   onRetry, 
   onClearFilters,
   onRefresh,
@@ -85,6 +87,7 @@ const WorkerList: React.FC<WorkerListProps> = ({
                 <WorkerCard 
                   key={worker.id} 
                   worker={worker} 
+                  userLocation={userLocation}
                   onDistanceClick={onDistanceClick}
                 />
               ))}

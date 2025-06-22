@@ -19,12 +19,13 @@ const Index = () => {
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
+  const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Haversine formula for distance calculation
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    if (!lat1 || !lon1 || !lat2 || !lon2) return undefined;
+    if ([lat1, lon1, lat2, lon2].some(coord => typeof coord !== 'number')) return undefined;
     const R = 6371; // Radius of the Earth in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -50,28 +51,33 @@ const Index = () => {
       // Transform Supabase data
       let transformedWorkers: Worker[] = data.map((worker: any) => {
         try {
-          let latitude = 0, longitude = 0;
-          if (worker.location_coordinates) {
-            const match = typeof worker.location_coordinates === 'string'
-              ? worker.location_coordinates.match(/POINT\(([-\d.]+) ([-\d.]+)\)/)
-              : null;
-            if (match) {
-              longitude = parseFloat(match[1]);
-              latitude = parseFloat(match[2]);
+          let latitude: number | undefined;
+          let longitude: number | undefined;
+          
+          if (worker.location_coordinates && typeof worker.location_coordinates === 'object') {
+            const coords = (worker.location_coordinates as any).coordinates;
+            if (coords && coords.length === 2) {
+              longitude = coords[0];
+              latitude = coords[1];
             }
           }
+
+          const distance = (userLocation && typeof latitude === 'number' && typeof longitude === 'number')
+            ? calculateDistance(userLocation.latitude, userLocation.longitude, latitude, longitude)
+            : undefined;
+
           return {
             id: worker.id.toString(),
             name: worker.full_name,
             avatar: '/placeholder.svg',
             profession: worker.service_category,
             category: worker.service_category,
-            rating: worker.average_rating || 0,
+            rating: worker.rating || 0,
             numReviews: worker.total_reviews || 0,
             hourlyRate: 0,
-            location: { latitude, longitude },
+            location: { latitude: latitude || 0, longitude: longitude || 0 },
             location_address: worker.location_address,
-            distance: userLocation ? calculateDistance(userLocation.latitude, userLocation.longitude, latitude, longitude) : undefined,
+            distance: distance,
             tags: [worker.service_subcategory],
             bio: '', availability: true,
             joined: new Date(worker.created_at).toLocaleDateString(),
@@ -119,8 +125,9 @@ const Index = () => {
   }, [toast]);
 
   const initializePage = useCallback(async () => {
-    let userLocation: { latitude: number, longitude: number } | null = null;
+    let fetchedUserLocation: { latitude: number, longitude: number } | null = null;
     
+    console.log("Initializing page, user:", user);
     // If user is logged in, try to get their location from their profile
     if (user) {
       const { data: profile, error } = await supabase
@@ -131,31 +138,35 @@ const Index = () => {
 
       if (error) {
         console.error("Error fetching user profile for location:", error);
-      } else if (profile?.location_coordinates) {
-        // Assuming location_coordinates is in "POINT(lon lat)" format
-        const match = (profile.location_coordinates as string).match(/POINT\(([-\d.]+) ([-\d.]+)\)/);
-        if (match) {
-          userLocation = { longitude: parseFloat(match[1]), latitude: parseFloat(match[2]) };
+      } else if (profile?.location_coordinates && typeof profile.location_coordinates === 'object') {
+        // Handle GeoJSON Point object from PostgREST
+        const coords = (profile.location_coordinates as any).coordinates;
+        if (coords && coords.length === 2) {
+          fetchedUserLocation = { longitude: coords[0], latitude: coords[1] };
         }
       }
     }
 
     // If no DB location, try browser geolocation as a fallback
-    if (!userLocation && navigator.geolocation) {
+    if (!fetchedUserLocation && navigator.geolocation) {
       try {
+        console.log("Attempting to get location from browser geolocation.");
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
         });
-        userLocation = {
+        fetchedUserLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
+        console.log("Got location from browser:", fetchedUserLocation);
       } catch (err) {
           console.warn('Could not get browser location:', err);
       }
     }
     
-    await fetchAndProcessWorkers(userLocation);
+    console.log("Final userLocation to be set:", fetchedUserLocation);
+    setUserLocation(fetchedUserLocation);
+    await fetchAndProcessWorkers(fetchedUserLocation);
   }, [fetchAndProcessWorkers, user]);
 
   // 2. On component mount, determine user location then fetch workers
@@ -240,6 +251,7 @@ const Index = () => {
         <WorkerList
           workers={filteredWorkers}
           loading={loading}
+          userLocation={userLocation}
           onClearFilters={handleClearFilters}
           onRefresh={() => initializePage()} // Re-run the whole init process on refresh
           onDistanceClick={handleDistanceClick}
