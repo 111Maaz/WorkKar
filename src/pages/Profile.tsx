@@ -1,13 +1,12 @@
-
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/UI/button';
+import { Input } from '@/components/UI/input';
+import { Label } from '@/components/UI/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
+import { Badge } from '@/components/UI/badge';
 import LocationInput from '@/components/UI/LocationInput';
-import { UserProfile } from '@/types';
+import { UserProfile, UserType } from '@/types';
 import { useToast } from "@/hooks/use-toast";
 import { User, MapPin, Phone, Briefcase } from 'lucide-react';
 
@@ -17,19 +16,31 @@ const mockUserProfile: UserProfile = {
   name: 'John Doe',
   email: 'john@example.com',
   mobile: '+1 (555) 123-4567',
-  userType: 'worker',
-  businessName: 'John\'s Plumbing',
-  category: 'Plumbing',
-  subcategory: 'Leak Repair',
-  location: { latitude: 40.7128, longitude: -74.0060 },
-  locationName: 'New York, NY',
-  services: ['Leak Repair', 'Pipe Installation'],
-  recentSearches: ['Electrician near me', 'House cleaning']
+  user_type: 'skilled_professional',
+  business_name: 'John\'s Plumbing',
+  location_address: 'New York, NY',
+  location_coordinates: '40.7128,-74.0060',
+  created_at: '2024-01-01T00:00:00Z',
+  updated_at: '2024-01-01T00:00:00Z'
 };
+
+// Extended interface for the component's internal state
+interface ExtendedUserProfile extends UserProfile {
+  category?: string;
+  subcategory?: string;
+  services?: string[];
+  recentSearches?: string[];
+}
 
 const Profile: React.FC = () => {
   const { toast } = useToast();
-  const [profile, setProfile] = useState<UserProfile>(mockUserProfile);
+  const [profile, setProfile] = useState<ExtendedUserProfile>({
+    ...mockUserProfile,
+    category: 'Plumbing',
+    subcategory: 'Leak Repair',
+    services: ['Leak Repair', 'Pipe Installation'],
+    recentSearches: ['Electrician near me', 'House cleaning']
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(profile);
 
@@ -45,8 +56,8 @@ const Profile: React.FC = () => {
   const handleLocationSelect = (location: { address: string; coordinates: [number, number] }) => {
     setEditForm(prev => ({
       ...prev,
-      location: { latitude: location.coordinates[1], longitude: location.coordinates[0] },
-      locationName: location.address
+      location_coordinates: `${location.coordinates[1]},${location.coordinates[0]}`,
+      location_address: location.address
     }));
   };
 
@@ -116,7 +127,7 @@ const Profile: React.FC = () => {
         </CardContent>
       </Card>
 
-      {profile.userType === 'worker' && (
+      {profile.user_type === 'skilled_professional' && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -131,8 +142,8 @@ const Profile: React.FC = () => {
                   <Label htmlFor="businessName">Business Name</Label>
                   <Input
                     id="businessName"
-                    value={editForm.businessName || ''}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, businessName: e.target.value }))}
+                    value={editForm.business_name || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, business_name: e.target.value }))}
                   />
                 </div>
                 <div>
@@ -156,7 +167,7 @@ const Profile: React.FC = () => {
               <>
                 <div>
                   <span className="font-medium">Business: </span>
-                  <span>{profile.businessName}</span>
+                  <span>{profile.business_name}</span>
                 </div>
                 <div>
                   <span className="font-medium">Category: </span>
@@ -197,20 +208,20 @@ const Profile: React.FC = () => {
               <Label>Service Area</Label>
               <LocationInput
                 onLocationSelect={handleLocationSelect}
-                placeholder={editForm.locationName || "Enter your location..."}
+                placeholder={editForm.location_address || "Enter your location..."}
                 className="mt-1"
               />
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <MapPin size={16} />
-              <span>{profile.locationName}</span>
+              <span>{profile.location_address}</span>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {profile.userType === 'client' && profile.recentSearches && profile.recentSearches.length > 0 && (
+      {profile.user_type === 'general_user' && profile.recentSearches && profile.recentSearches.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Recent Searches</CardTitle>
