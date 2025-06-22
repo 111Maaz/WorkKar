@@ -12,7 +12,7 @@ import WorkerSignUp from '@/components/Auth/WorkerSignUp';
 import Login from '@/components/Auth/Login';
 
 type UserType = 'skilled_professional' | 'general_user';
-type ServiceCategory = 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'other';
+type ServiceCategory = 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'auto_repair' | 'other';
 
 interface SignUpData {
   password: string;
@@ -46,6 +46,7 @@ const categories = [
   { id: 'false_ceiling', name: 'False Ceiling' },
   { id: 'tailoring', name: 'Tailoring' },
   { id: 'cleaning', name: 'Cleaning' },
+  { id: 'auto_repair', name: 'Auto Repair' },
   { id: 'other', name: 'Other' }
 ];
 
@@ -61,6 +62,7 @@ const subcategoryMappings: Record<ServiceCategory, string[]> = {
   false_ceiling: ['POP Ceiling', 'Gypsum Design', 'LED Integration', 'Grid Setup'],
   tailoring: ['Blouse Stitching', 'Pants', 'Kids Wear', 'Alteration'],
   cleaning: ['Home Deep Cleaning', 'Sofa Shampooing', 'Bathroom Cleaning', 'Tank Disinfection'],
+  auto_repair: ['Two-Wheeler', 'Four-Wheeler', 'Auto / Taxi / Van', 'Truck / Goods Vehicle'],
   other: []
 };
 

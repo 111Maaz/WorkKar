@@ -27,6 +27,7 @@ const categoryColors: { [key: string]: string } = {
   'False Ceiling': 'border-t-cyan-500',
   'Tailoring': 'border-t-pink-500',
   'Cleaning': 'border-t-teal-500',
+  'Auto Repair': 'border-t-amber-500',
   'default': 'border-t-slate-500'
 };
 

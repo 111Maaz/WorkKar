@@ -56,6 +56,7 @@ const categories = [
   { id: 'false_ceiling', name: 'False Ceiling', subcategories: ['POP Ceiling', 'Gypsum Design', 'LED Integration', 'Grid Setup'] },
   { id: 'tailoring', name: 'Tailoring', subcategories: ['Blouse Stitching', 'Pants', 'Kids Wear', 'Alteration'] },
   { id: 'cleaning', name: 'Cleaning', subcategories: ['Home Deep Cleaning', 'Sofa Shampooing', 'Bathroom Cleaning', 'Tank Disinfection'] },
+  { id: 'auto_repair', name: 'Auto Repair', subcategories: ['Two-Wheeler', 'Four-Wheeler', 'Auto / Taxi / Van', 'Truck / Goods Vehicle'] },
   { id: 'other', name: 'Other', subcategories: ['Custom Service'] }
 ];
 

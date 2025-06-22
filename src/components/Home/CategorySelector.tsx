@@ -1,7 +1,8 @@
 import React from 'react';
 import { 
   HardHat, Wrench, Paintbrush, Hammer, Zap, Flame, BookOpen, 
-  Grid, LayoutGrid, Scissors, Sparkles 
+  Grid, LayoutGrid, Scissors, Sparkles, Droplets, Car, Trees, 
+  Dog, Home, Settings, Palette, Lightbulb, Shield
 } from 'lucide-react';
 
 interface CategorySelectorProps {
@@ -10,19 +11,90 @@ interface CategorySelectorProps {
 }
 
 const categoryIcons: { [key: string]: React.ElementType } = {
+  // Primary categories with exact matches
   'Construction': HardHat,
-  'Plumbing': Wrench,
+  'Plumbing': Droplets,
   'Electrical': Zap,
+  'Electrical Services': Zap,
   'Carpentry': Hammer,
   'Painting': Paintbrush,
   'Welding': Flame,
   'Home tutor': BookOpen,
+  'Home Tutor': BookOpen,
+  'Education': BookOpen,
   'Flooring / tiles': Grid,
+  'Flooring / Tiles': Grid,
   'False ceiling': LayoutGrid,
+  'False Ceiling': LayoutGrid,
   'Tailoring': Scissors,
   'Cleaning': Sparkles,
+  'Cleaning Services': Sparkles,
+  'Auto Repair': Car,
+  
+  // Additional categories that might appear
+  'Landscaping': Trees,
+  'Pet Care': Dog,
+  'Home Services': Home,
+  'Maintenance': Settings,
+  'Repair': Wrench,
+  'Art & Design': Palette,
+  'Lighting': Lightbulb,
+  'Security': Shield,
+  
+  // Fallback for variations
   'Other': Wrench,
   'default': Wrench
+};
+
+// Helper function to get the appropriate icon for a category
+const getCategoryIcon = (categoryName: string): React.ElementType => {
+  // First try exact match
+  if (categoryIcons[categoryName]) {
+    return categoryIcons[categoryName];
+  }
+  
+  // Try case-insensitive match
+  const lowerCategory = categoryName.toLowerCase();
+  for (const [key, icon] of Object.entries(categoryIcons)) {
+    if (key.toLowerCase() === lowerCategory) {
+      return icon;
+    }
+  }
+  
+  // Try partial matches for common variations
+  if (lowerCategory.includes('electrical') || lowerCategory.includes('electric')) {
+    return Zap;
+  }
+  if (lowerCategory.includes('plumbing') || lowerCategory.includes('plumber')) {
+    return Droplets;
+  }
+  if (lowerCategory.includes('carpentry') || lowerCategory.includes('carpenter')) {
+    return Hammer;
+  }
+  if (lowerCategory.includes('painting') || lowerCategory.includes('paint')) {
+    return Paintbrush;
+  }
+  if (lowerCategory.includes('cleaning') || lowerCategory.includes('clean')) {
+    return Sparkles;
+  }
+  if (lowerCategory.includes('tutor') || lowerCategory.includes('education') || lowerCategory.includes('teaching')) {
+    return BookOpen;
+  }
+  if (lowerCategory.includes('construction') || lowerCategory.includes('build')) {
+    return HardHat;
+  }
+  if (lowerCategory.includes('landscaping') || lowerCategory.includes('garden')) {
+    return Trees;
+  }
+  if (lowerCategory.includes('auto') || lowerCategory.includes('car')) {
+    return Car;
+  }
+  if (lowerCategory.includes('pet') || lowerCategory.includes('dog') || lowerCategory.includes('animal')) {
+    return Dog;
+  }
+  
+  // Default fallback
+  return categoryIcons['default'];
 };
 
 const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onSelectCategory }) => {
@@ -37,7 +109,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onSelec
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
           {categories.map((category) => {
-            const Icon = categoryIcons[category] || categoryIcons['default'];
+            const Icon = getCategoryIcon(category);
             return (
               <button
                 key={category}

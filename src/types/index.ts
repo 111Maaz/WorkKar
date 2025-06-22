@@ -45,7 +45,7 @@ export interface Review {
 }
 
 export type UserType = 'skilled_professional' | 'general_user';
-export type ServiceCategory = 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'other';
+export type ServiceCategory = 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'auto_repair' | 'other';
 
 export interface UserProfile {
   id: string;
