@@ -23,41 +23,41 @@ const WorkerProfilePage = () => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const fetchWorkerData = async () => {
+    if (!id) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Fetch worker details
+      const { data: workerData, error: workerError } = await supabase
+        .from('workers')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (workerError) throw workerError;
+      setWorker(workerData);
+
+      // Fetch worker reviews
+      const { data: reviewsData, error: reviewsError } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('worker_id', id)
+        .order('created_at', { ascending: false });
+
+      if (reviewsError) throw reviewsError;
+      setReviews(reviewsData || []);
+
+    } catch (err: any) {
+      setError(err.message || 'An unknown error occurred');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchWorkerData = async () => {
-      if (!id) return;
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Fetch worker details
-        const { data: workerData, error: workerError } = await supabase
-          .from('workers')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (workerError) throw workerError;
-        setWorker(workerData);
-
-        // Fetch worker reviews
-        const { data: reviewsData, error: reviewsError } = await supabase
-          .from('reviews')
-          .select('*')
-          .eq('worker_id', id)
-          .order('created_at', { ascending: false });
-
-        if (reviewsError) throw reviewsError;
-        setReviews(reviewsData || []);
-
-      } catch (err: any) {
-        setError(err.message || 'An unknown error occurred');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchWorkerData();
   }, [id]);
 
@@ -84,6 +84,9 @@ const WorkerProfilePage = () => {
         setReviews([reviewData, ...reviews]);
         setNewComment('');
         setNewRating(0);
+        
+        // Refetch worker data to get updated average rating
+        fetchWorkerData();
 
     } catch(err: any) {
         console.error("Error submitting review:", err);
@@ -119,7 +122,7 @@ const WorkerProfilePage = () => {
               <h1 className="text-3xl font-bold">{worker.full_name}</h1>
               <p className="text-lg text-muted-foreground">{worker.service_category}</p>
               <div className="flex items-center gap-2 mt-2">
-                <RatingStars rating={worker.rating || 0} />
+                <RatingStars rating={worker.average_rating || 0} />
                 <span className="text-muted-foreground">({worker.total_reviews || 0} reviews)</span>
               </div>
               <div className="flex items-center gap-2 mt-2 text-muted-foreground">

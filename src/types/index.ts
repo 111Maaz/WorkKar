@@ -11,6 +11,8 @@ export interface Worker {
   category: string;
   rating: number;
   numReviews: number;
+  average_rating?: number;
+  total_reviews?: number;
   hourlyRate: number;
   location: GeoPoint;
   location_address?: string; // Full address string
