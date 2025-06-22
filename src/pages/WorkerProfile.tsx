@@ -288,10 +288,12 @@ const WorkerProfilePage = () => {
                       </div>
                   </CardContent>
                   <CardContent>
-                      <Button className="w-full" size="lg">
-                          <Send size={16} className="mr-2" />
-                          Hire Me
-                      </Button>
+                      <a href={`tel:${worker.mobile_number}`} className="w-full">
+                        <Button className="w-full" size="lg">
+                            <Phone size={16} className="mr-2" />
+                            Hire Me
+                        </Button>
+                      </a>
                   </CardContent>
               </Card>
           </div>
