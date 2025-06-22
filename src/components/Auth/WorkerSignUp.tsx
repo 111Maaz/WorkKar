@@ -1,8 +1,8 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/UI/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
 import { RadioGroup, RadioGroupItem } from "@/components/UI/radio-group";
 import LocationInput from '@/components/UI/LocationInput';
 import { useToast } from "@/hooks/use-toast";

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Search, RotateCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 
 interface NoResultsStateProps {
   onResetFilters: () => void;

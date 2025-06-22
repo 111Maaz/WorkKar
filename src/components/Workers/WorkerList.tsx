@@ -4,7 +4,7 @@ import LoadingState from '../UI/LoadingState';
 import NoResultsState from '../UI/NoResultsState';
 import ErrorState from '../UI/ErrorState';
 import { Worker } from '@/types';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/UI/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface WorkerListProps {

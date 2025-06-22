@@ -1,7 +1,7 @@
 import React, { useState, Suspense } from 'react';
 import { MapPin, Navigation, Map } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/UI/input';
+import { Button } from '@/components/UI/button';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 
 const MapPicker = React.lazy(() => import('./MapPicker'));
