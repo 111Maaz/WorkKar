@@ -8,9 +8,13 @@ import WorkerList from '@/components/Workers/WorkerList';
 import BottomNavigation from '@/components/Layout/BottomNavigation';
 import { Worker } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,35 +119,42 @@ const Index = () => {
   const initializePage = useCallback(async () => {
     let userLocation: { latitude: number, longitude: number } | null = null;
     
-    // Try getting location from LocalStorage first
-    const savedLocation = localStorage.getItem('userLocation');
-    if (savedLocation) {
-      try {
-        userLocation = JSON.parse(savedLocation);
-        localStorage.removeItem('userLocation'); // Clean up after use
-      } catch (e) {
-        console.error("Failed to parse saved location", e);
+    // If user is logged in, try to get their location from their profile
+    if (user) {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('location_coordinates')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user profile for location:", error);
+      } else if (profile?.location_coordinates) {
+        // Assuming location_coordinates is in "POINT(lon lat)" format
+        const match = (profile.location_coordinates as string).match(/POINT\(([-\d.]+) ([-\d.]+)\)/);
+        if (match) {
+          userLocation = { longitude: parseFloat(match[1]), latitude: parseFloat(match[2]) };
+        }
       }
     }
 
-    // If no location from LocalStorage, try browser geolocation
+    // If no DB location, try browser geolocation as a fallback
     if (!userLocation && navigator.geolocation) {
       try {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
         });
         userLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
       } catch (err) {
-          console.error('Error getting location:', err);
+          console.warn('Could not get browser location:', err);
       }
     }
     
-    // Finally, fetch workers with whatever location we found (or null)
     await fetchAndProcessWorkers(userLocation);
-  }, [fetchAndProcessWorkers]);
+  }, [fetchAndProcessWorkers, user]);
 
   // 2. On component mount, determine user location then fetch workers
   useEffect(() => {
@@ -193,15 +204,13 @@ const Index = () => {
     });
   };
   
-  // Handle worker profile click
-  const handleWorkerClick = (workerId: string) => {
-    const worker = workers.find(w => w.id === workerId);
-    if (worker) {
-      toast({
-        title: "Worker Profile",
-        description: `Viewing ${worker.name}'s profile. This would navigate to a detailed profile page.`,
-      });
-    }
+  // Handle click when distance is unknown for a logged-in user
+  const handleDistanceClick = () => {
+    toast({
+      title: "Set Your Location",
+      description: "Please update your profile with your location to calculate distances.",
+    });
+    navigate('/profile');
   };
 
   // Clear filters handler
@@ -221,7 +230,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Navbar />
       <main className="flex-grow">
         <Hero onSearch={handleSearch} ref={heroRef} inputRef={searchInputRef} />
@@ -229,9 +238,9 @@ const Index = () => {
         <WorkerList
           workers={filteredWorkers}
           loading={loading}
-          onWorkerClick={handleWorkerClick}
           onClearFilters={handleClearFilters}
           onRefresh={() => initializePage()} // Re-run the whole init process on refresh
+          onDistanceClick={handleDistanceClick}
         />
       </main>
       <Footer />

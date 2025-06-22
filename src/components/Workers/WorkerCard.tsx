@@ -4,11 +4,14 @@ import { Worker } from '@/types';
 import { Button } from '@/components/UI/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from "@/components/UI/avatar";
+import RatingStars from '@/components/UI/RatingStars';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface WorkerCardProps {
   worker: Worker;
-  onClick: (workerId: string) => void;
   className?: string;
+  onDistanceClick: () => void;
 }
 
 const categoryColors: { [key: string]: string } = {
@@ -26,11 +29,29 @@ const categoryColors: { [key: string]: string } = {
   'default': 'border-t-slate-500'
 };
 
-const WorkerCard: React.FC<WorkerCardProps> = ({ worker, onClick, className }) => {
+const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, onDistanceClick }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Open device's default dialer with pre-filled number
     window.location.href = `tel:${worker.mobile}`;
+  };
+
+  const handleCardClick = () => {
+    navigate(`/worker/${worker.id}`);
+  };
+
+  const handleKnowDistanceClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    if (!user) {
+      // If user is not logged in, go to auth page
+      navigate('/auth');
+    } else {
+      // If user is logged in, let the parent component handle it
+      onDistanceClick();
+    }
   };
 
   const accentColor = categoryColors[worker.category] || categoryColors['default'];
@@ -45,7 +66,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, onClick, className }) =
         "border-t-4",
         className
       )}
-      onClick={() => onClick(worker.id)}
+      onClick={handleCardClick}
     >
       <div className="p-4">
         <div className="flex items-start gap-4 mb-3">
@@ -61,7 +82,11 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, onClick, className }) =
               {worker.availability && <div className="w-2.5 h-2.5 bg-green-500 rounded-full" title="Available now"></div>}
             </div>
             <p className="text-muted-foreground text-sm font-medium">{worker.category}</p>
-            <p className="text-muted-foreground text-xs">{worker.tags.join(', ')}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <RatingStars rating={worker.rating} size={16} />
+              <span className="text-xs text-muted-foreground">({worker.numReviews} reviews)</span>
+            </div>
+            <p className="text-muted-foreground text-xs mt-1">{worker.tags.join(', ')}</p>
           </div>
         </div>
         
@@ -71,9 +96,9 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, onClick, className }) =
             {worker.distance ? (
               <span>{`${worker.distance.toFixed(1)} km away`}</span>
             ) : (
-              <a href="/auth" className="text-primary hover:underline font-medium">
+              <button onClick={handleKnowDistanceClick} className="text-primary hover:underline font-medium text-left">
                 Know the distance
-              </a>
+              </button>
             )}
           </div>
           

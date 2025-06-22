@@ -9,22 +9,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface WorkerListProps {
   workers: Worker[];
-  onWorkerClick: (workerId: string) => void;
   loading?: boolean;
   error?: boolean;
   onRetry?: () => void;
   onClearFilters?: () => void;
   onRefresh?: () => void;
+  onDistanceClick: () => void;
 }
 
 const WorkerList: React.FC<WorkerListProps> = ({ 
   workers, 
-  onWorkerClick, 
   loading = false, 
   error = false, 
   onRetry, 
   onClearFilters,
-  onRefresh
+  onRefresh,
+  onDistanceClick
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const workersPerPage = 6;
@@ -85,7 +85,7 @@ const WorkerList: React.FC<WorkerListProps> = ({
                 <WorkerCard 
                   key={worker.id} 
                   worker={worker} 
-                  onClick={onWorkerClick} 
+                  onDistanceClick={onDistanceClick}
                 />
               ))}
             </div>

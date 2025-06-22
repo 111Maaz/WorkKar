@@ -1,63 +1,4 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export type Database = {
-  public: {
-    Tables: {
-      profiles: {
-        Row: {
-          id: string
-          created_at: string
-          updated_at: string
-          full_name: string | null
-          email: string | null
-          mobile_number: string | null
-          user_type: 'general_user' | 'skilled_professional'
-          avatar_url: string | null
-          website: string | null
-          location_address: string | null
-          location_coordinates: unknown | null
-          business_name: string | null
-          email_verified: boolean
-          is_active: boolean
-        }
-        Insert: {
-          id: string
-          created_at?: string
-          updated_at?: string
-          full_name?: string | null
-          email?: string | null
-          mobile_number?: string | null
-          user_type?: 'general_user' | 'skilled_professional'
-          avatar_url?: string | null
-          website?: string | null
-          location_address?: string | null
-          location_coordinates?: unknown | null
-          business_name?: string | null
-          email_verified?: boolean
-          is_active?: boolean
-        }
-        Update: {
-          id?: string
-          created_at?: string
-          updated_at?: string
-          full_name?: string | null
-          email?: string | null
-          mobile_number?: string | null
-          user_type?: 'general_user' | 'skilled_professional'
-          avatar_url?: string | null
-          website?: string | null
-          location_address?: string | null
-          location_coordinates?: unknown | null
-          business_name?: string | null
-          email_verified?: boolean
-          is_active?: boolean
-        }
+// ... existing code ...
         Relationships: [
           {
             foreignKeyName: "profiles_id_fkey"
@@ -65,63 +6,51 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
-      }
+      },
       workers: {
         Row: {
           id: number
+          user_id: string
+          name: string
+          email: string
+          phone: string
+          address: string
+          city: string
+          state: string
+          zip: string
+          country: string
           created_at: string
           updated_at: string
-          user_id: string | null
-          full_name: string
-          email: string | null
-          mobile_number: string
-          business_name: string | null
-          service_category: 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'other'
-          service_subcategory: string
-          location_address: string | null
-          location_coordinates: unknown | null
-          email_verified: boolean
-          is_active: boolean
-          rating: number | null
-          total_reviews: number
         }
         Insert: {
           id?: number
+          user_id: string
+          name: string
+          email: string
+          phone: string
+          address: string
+          city: string
+          state: string
+          zip: string
+          country: string
           created_at?: string
           updated_at?: string
-          user_id?: string | null
-          full_name: string
-          email?: string | null
-          mobile_number: string
-          business_name?: string | null
-          service_category: 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'other'
-          service_subcategory: string
-          location_address?: string | null
-          location_coordinates?: unknown | null
-          email_verified?: boolean
-          is_active?: boolean
-          rating?: number | null
-          total_reviews?: number
         }
         Update: {
           id?: number
+          user_id?: string
+          name?: string
+          email?: string
+          phone?: string
+          address?: string
+          city?: string
+          state?: string
+          zip?: string
+          country?: string
           created_at?: string
           updated_at?: string
-          user_id?: string | null
-          full_name?: string
-          email?: string | null
-          mobile_number?: string
-          business_name?: string | null
-          service_category?: 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'other'
-          service_subcategory?: string
-          location_address?: string | null
-          location_coordinates?: unknown | null
-          email_verified?: boolean
-          is_active?: boolean
-          rating?: number | null
-          total_reviews?: number
         }
         Relationships: [
           {
@@ -132,52 +61,50 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
-      }
+      },
       service_categories: {
         Row: {
           id: number
+          name: string
           created_at: string
-          category_id: string
-          category_name: string
-          is_active: boolean
+          updated_at: string
         }
         Insert: {
           id?: number
+          name: string
           created_at?: string
-          category_id: string
-          category_name: string
-          is_active?: boolean
+          updated_at?: string
         }
         Update: {
           id?: number
+          name?: string
           created_at?: string
-          category_id?: string
-          category_name?: string
-          is_active?: boolean
+          updated_at?: string
         }
-        Relationships: []
-      }
+        Relationships: [
+        ]
+      },
       service_subcategories: {
         Row: {
           id: number
+          name: string
+          category_id: number
           created_at: string
-          category_id: string
-          subcategory_name: string
-          is_active: boolean
+          updated_at: string
         }
         Insert: {
           id?: number
+          name: string
+          category_id: number
           created_at?: string
-          category_id: string
-          subcategory_name: string
-          is_active?: boolean
+          updated_at?: string
         }
         Update: {
           id?: number
+          name?: string
+          category_id?: number
           created_at?: string
-          category_id?: string
-          subcategory_name?: string
-          is_active?: boolean
+          updated_at?: string
         }
         Relationships: [
           {
@@ -188,31 +115,28 @@ export type Database = {
             referencedColumns: ["category_id"]
           }
         ]
-      }
+      },
       user_sessions: {
         Row: {
-          id: string
-          created_at: string
+          id: number
           user_id: string
-          session_token: string
-          expires_at: string
-          is_active: boolean
+          session_id: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id?: string
-          created_at?: string
+          id?: number
           user_id: string
-          session_token: string
-          expires_at: string
-          is_active?: boolean
+          session_id: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          id?: string
-          created_at?: string
+          id?: number
           user_id?: string
-          session_token?: string
-          expires_at?: string
-          is_active?: boolean
+          session_id?: string
+          created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -223,31 +147,28 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
-      }
+      },
       email_verification_tokens: {
         Row: {
-          id: string
-          created_at: string
+          id: number
           user_id: string
           token: string
-          expires_at: string
-          is_used: boolean
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          id?: string
-          created_at?: string
+          id?: number
           user_id: string
           token: string
-          expires_at: string
-          is_used?: boolean
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          id?: string
-          created_at?: string
+          id?: number
           user_id?: string
           token?: string
-          expires_at?: string
-          is_used?: boolean
+          created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -258,19 +179,56 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      },
+      reviews: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          worker_id: number
+          user_id: string
+          rating: number
+          comment: string | null
+          user_name: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          worker_id: number
+          user_id: string
+          rating: number
+          comment?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          worker_id?: number
+          user_id?: string
+          rating?: number
+          comment?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
       [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-} 
+// ... existing code ...

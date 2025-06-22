@@ -8,7 +8,7 @@ interface HeroProps {
 
 const Hero = forwardRef<HTMLDivElement, HeroProps>(({ onSearch, inputRef }, ref) => {
   return (
-    <div className="relative pt-20 pb-10 animated-gradient" ref={ref}>
+    <div className="relative pt-20 pb-20 -mb-10 md:pb-32 md:-mb-10 animated-gradient" ref={ref}>
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 animate-fade-in-up">
           Find Skilled Professionals In Your Area
