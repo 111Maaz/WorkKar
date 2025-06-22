@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/UI/button';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
 
   return (
     <nav className="bg-card shadow-sm fixed w-full z-10 border-b">
@@ -20,10 +31,38 @@ const Navbar: React.FC = () => {
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-2">
-            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => window.location.href = '/auth'}>
-              <User size={18} />
-              <span>Sign In</span>
-            </Button>
+            {user ? (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2" 
+                  onClick={() => window.location.href = '/profile'}
+                >
+                  <User size={18} />
+                  <span>Profile</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2" 
+                  onClick={handleSignOut}
+                >
+                  <LogOut size={18} />
+                  <span>Sign Out</span>
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2" 
+                onClick={() => window.location.href = '/auth'}
+              >
+                <User size={18} />
+                <span>Sign In</span>
+              </Button>
+            )}
             <ThemeToggle />
           </div>
 
@@ -46,12 +85,38 @@ const Navbar: React.FC = () => {
         isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
       )}>
         <div className="px-2 pt-2 pb-3 space-y-1 bg-card shadow-md">
-          <button 
-            onClick={() => window.location.href = '/auth'}
-            className="block w-full text-left px-3 py-2 text-base font-medium text-foreground/80 hover:text-primary hover:bg-muted rounded-md"
-          >
-            Sign In
-          </button>
+          {user ? (
+            <>
+              <button 
+                onClick={() => {
+                  window.location.href = '/profile';
+                  setIsOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-foreground/80 hover:text-primary hover:bg-muted rounded-md"
+              >
+                Profile
+              </button>
+              <button 
+                onClick={() => {
+                  handleSignOut();
+                  setIsOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-foreground/80 hover:text-primary hover:bg-muted rounded-md"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => {
+                window.location.href = '/auth';
+                setIsOpen(false);
+              }}
+              className="block w-full text-left px-3 py-2 text-base font-medium text-foreground/80 hover:text-primary hover:bg-muted rounded-md"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </nav>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
@@ -9,6 +9,7 @@ import LocationInput from '@/components/UI/LocationInput';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import WorkerSignUp from '@/components/Auth/WorkerSignUp';
+import Login from '@/components/Auth/Login';
 
 type UserType = 'skilled_professional' | 'general_user';
 type ServiceCategory = 'construction' | 'plumbing' | 'electrical' | 'carpentry' | 'painting' | 'welding' | 'home_tutor' | 'flooring_tiles' | 'false_ceiling' | 'tailoring' | 'cleaning' | 'other';
@@ -87,10 +88,38 @@ const hardcodedUsers = [
 ];
 
 const Auth = () => {
+  const [activeTab, setActiveTab] = useState('login');
+
+  useEffect(() => {
+    const handleSwitchToLogin = () => setActiveTab('login');
+    const handleSwitchToSignup = () => setActiveTab('signup');
+
+    window.addEventListener('switchToLogin', handleSwitchToLogin);
+    window.addEventListener('switchToSignup', handleSwitchToSignup);
+
+    return () => {
+      window.removeEventListener('switchToLogin', handleSwitchToLogin);
+      window.removeEventListener('switchToSignup', handleSwitchToSignup);
+    };
+  }, []);
+
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 p-2 sm:p-4">
       <div className="w-full max-w-lg">
-        <WorkerSignUp />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="login">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="login" className="mt-0">
+            <Login />
+          </TabsContent>
+          
+          <TabsContent value="signup" className="mt-0">
+            <WorkerSignUp />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
