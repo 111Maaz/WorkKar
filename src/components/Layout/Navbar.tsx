@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex items-center gap-2" 
+                  className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
                   onClick={() => window.location.href = '/profile'}
                 >
                   <User size={18} />
@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex items-center gap-2" 
+                  className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
                   onClick={handleSignOut}
                 >
                   <LogOut size={18} />
@@ -56,7 +56,7 @@ const Navbar: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="flex items-center gap-2" 
+                className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
                 onClick={() => window.location.href = '/auth'}
               >
                 <User size={18} />

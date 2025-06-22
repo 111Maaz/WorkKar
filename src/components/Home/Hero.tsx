@@ -18,8 +18,8 @@ const Hero = forwardRef<HTMLDivElement, HeroProps>(({ onSearch, inputRef }, ref)
           Get jobs done quickly, reliably, and affordably.
         </p>
         
-        <div className="max-w-3xl mx-auto animate-fade-in-up [animation-delay:400ms]">
-          <div className="bg-background/20 backdrop-blur-sm p-2 rounded-lg shadow-lg">
+        <div className="max-w-3xl mx-auto animate-fade-in-up [animation-delay:400ms] transition-all duration-300 hover:scale-105">
+          <div className="bg-background/20 backdrop-blur-sm p-2 rounded-lg shadow-lg hover:shadow-xl">
             <SearchBar 
               ref={inputRef}
               onSearch={onSearch} 
@@ -28,37 +28,37 @@ const Hero = forwardRef<HTMLDivElement, HeroProps>(({ onSearch, inputRef }, ref)
         </div>
         
         <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-4 text-secondary-foreground animate-fade-in-up [animation-delay:600ms]">
-          <div className="flex items-center">
-            <div className="p-2 bg-white/20 rounded-full mr-2">
+          <div className="group flex items-center p-2 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
+            <div className="p-2 bg-white/20 rounded-full mr-2 transition-all duration-300 group-hover:bg-white/30">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span>Verified Professionals</span>
+            <span className="transition-colors duration-300 group-hover:text-primary-foreground dark:group-hover:text-primary">Verified Professionals</span>
           </div>
-          <div className="flex items-center">
-            <div className="p-2 bg-white/20 rounded-full mr-2">
+          <div className="group flex items-center p-2 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
+            <div className="p-2 bg-white/20 rounded-full mr-2 transition-all duration-300 group-hover:bg-white/30">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <span>Fast Response Times</span>
+            <span className="transition-colors duration-300 group-hover:text-primary-foreground dark:group-hover:text-primary">Fast Response Times</span>
           </div>
-          <div className="flex items-center">
-            <div className="p-2 bg-white/20 rounded-full mr-2">
+          <div className="group flex items-center p-2 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
+            <div className="p-2 bg-white/20 rounded-full mr-2 transition-all duration-300 group-hover:bg-white/30">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <span>Same-Day Availability</span>
+            <span className="transition-colors duration-300 group-hover:text-primary-foreground dark:group-hover:text-primary">Same-Day Availability</span>
           </div>
-          <div className="flex items-center">
-            <div className="p-2 bg-white/20 rounded-full mr-2">
+          <div className="group flex items-center p-2 rounded-lg transition-all duration-300 hover:scale-110 cursor-pointer">
+            <div className="p-2 bg-white/20 rounded-full mr-2 transition-all duration-300 group-hover:bg-white/30">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <span>Secure Payments</span>
+            <span className="transition-colors duration-300 group-hover:text-primary-foreground dark:group-hover:text-primary">Secure Payments</span>
           </div>
         </div>
       </div>

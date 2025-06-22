@@ -64,9 +64,7 @@
     --input: 222 10% 25%;
     --ring: 25 100% 65%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -76,11 +74,16 @@
   }
 
   .hero-gradient {
-    background: linear-gradient(90deg, rgba(13, 110, 253, 0.9) 0%, rgba(13, 110, 253, 0.7) 50%, rgba(13, 110, 253, 0.8) 100%);
+    background: linear-gradient(
+      90deg,
+      hsl(var(--secondary) / 0.9),
+      hsl(var(--secondary) / 0.7),
+      hsl(var(--secondary) / 0.8)
+    );
   }
-  
+
   .category-card {
-    @apply flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-md transition-all hover:shadow-lg hover:-translate-y-1;
+    @apply flex flex-col items-center justify-center p-4 bg-card rounded-lg shadow-md transition-all hover:shadow-lg hover:-translate-y-1;
   }
 }
 
