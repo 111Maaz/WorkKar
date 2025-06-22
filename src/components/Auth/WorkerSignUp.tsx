@@ -4,11 +4,10 @@ import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
 import { RadioGroup, RadioGroupItem } from "@/components/UI/radio-group";
-import LocationInput from '@/components/UI/LocationInput';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building } from 'lucide-react';
 
 const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
@@ -24,7 +23,7 @@ const formSchema = z.object({
   confirmPassword: z.string(),
   mobile: z.string().min(10, "Please enter a valid mobile number."),
   location: z.object({
-    address: z.string(),
+    address: z.string().min(1, "Location is required."),
     coordinates: z.tuple([z.number(), z.number()])
   }).nullable(),
   category: serviceCategoryEnum.optional(),
@@ -105,9 +104,14 @@ const WorkerSignUp: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Manually check for location as it's a custom component
     const validationResult = formSchema.safeParse(formData);
-    if (!validationResult.success) {
-      setErrors(validationResult.error);
+    if (!validationResult.success || !formData.location) {
+        setErrors(validationResult.success === false ? validationResult.error : new z.ZodError([{
+            path: ["location"],
+            message: "Location is required",
+            code: z.ZodIssueCode.custom
+        }]));
       toast({
         title: "Missing Information",
         description: "Please correct the errors below.",
@@ -158,18 +162,18 @@ const WorkerSignUp: React.FC = () => {
     }
   };
   
-  const getError = (field: keyof SignUpData) => errors?.issues.find(issue => issue.path[0] === field)?.message;
+  const getError = (field: keyof SignUpData | 'location') => errors?.issues.find(issue => issue.path[0] === field)?.message;
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full">
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-foreground">Create Account</h2>
-        <p className="text-muted-foreground mt-2">Join our community of professionals</p>
+        <h2 className="text-2xl font-bold text-foreground">Create Your Account</h2>
+        <p className="text-muted-foreground mt-1">Join our community of professionals.</p>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label>I am a...</Label>
+          <Label className="text-muted-foreground">I am a...</Label>
           <RadioGroup 
             defaultValue="general_user" 
             className="flex gap-4 mt-2"
@@ -187,7 +191,7 @@ const WorkerSignUp: React.FC = () => {
         </div>
 
         <div>
-          <Label htmlFor="name" className="flex items-center gap-2">
+          <Label htmlFor="name" className="flex items-center gap-2 text-muted-foreground">
             <User size={16} />
             Full Name *
           </Label>
@@ -197,13 +201,13 @@ const WorkerSignUp: React.FC = () => {
             value={formData.name || ''}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             placeholder="Enter your full name" 
-            required 
+            className={`mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('name') ? 'border-red-500' : ''}`}
           />
           {getError('name') && <p className="text-sm text-red-500 mt-1">{getError('name')}</p>}
         </div>
 
         <div>
-          <Label htmlFor="email" className="flex items-center gap-2">
+          <Label htmlFor="email" className="flex items-center gap-2 text-muted-foreground">
             <Mail size={16} />
             Email Address *
           </Label>
@@ -212,26 +216,25 @@ const WorkerSignUp: React.FC = () => {
             type="email" 
             value={formData.email || ''}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="Enter your email address" 
-            required 
+            placeholder="you@example.com" 
+            className={`mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('email') ? 'border-red-500' : ''}`}
           />
           {getError('email') && <p className="text-sm text-red-500 mt-1">{getError('email')}</p>}
         </div>
 
         <div>
-          <Label htmlFor="password" className="flex items-center gap-2">
+          <Label htmlFor="password" className="flex items-center gap-2 text-muted-foreground">
             <Lock size={16} />
             Password *
           </Label>
-          <div className="relative">
+          <div className="relative mt-1">
             <Input 
               id="password" 
               type={showPassword ? 'text' : 'password'} 
               value={formData.password || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-              placeholder="Create a password" 
-              className="pr-10"
-              required 
+              placeholder="Create a password (min. 6 characters)" 
+              className={`pr-10 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('password') ? 'border-red-500' : ''}`}
             />
             <button
               type="button"
@@ -245,19 +248,18 @@ const WorkerSignUp: React.FC = () => {
         </div>
 
         <div>
-          <Label htmlFor="confirmPassword" className="flex items-center gap-2">
+          <Label htmlFor="confirmPassword" className="flex items-center gap-2 text-muted-foreground">
             <Lock size={16} />
             Confirm Password *
           </Label>
-          <div className="relative">
+          <div className="relative mt-1">
             <Input 
               id="confirmPassword" 
               type={showConfirmPassword ? 'text' : 'password'} 
               value={formData.confirmPassword || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
               placeholder="Confirm your password" 
-              className="pr-10"
-              required 
+              className={`pr-10 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('confirmPassword') ? 'border-red-500' : ''}`}
             />
             <button
               type="button"
@@ -271,17 +273,17 @@ const WorkerSignUp: React.FC = () => {
         </div>
 
         <div>
-          <Label htmlFor="mobile" className="flex items-center gap-2">
+          <Label htmlFor="mobile" className="flex items-center gap-2 text-muted-foreground">
             <Phone size={16} />
             Mobile Number *
           </Label>
           <Input 
             id="mobile" 
-            type="tel" 
+            type="tel"
             value={formData.mobile || ''}
             onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
-            placeholder="Enter your mobile number" 
-            required 
+            placeholder="Enter your 10-digit mobile number" 
+            className={`mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('mobile') ? 'border-red-500' : ''}`}
           />
           {getError('mobile') && <p className="text-sm text-red-500 mt-1">{getError('mobile')}</p>}
         </div>
@@ -289,104 +291,82 @@ const WorkerSignUp: React.FC = () => {
         {formData.userType === 'skilled_professional' && (
           <>
             <div>
-              <Label htmlFor="category">Service Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => {
-                setFormData(prev => ({ ...prev, category: value as z.infer<typeof serviceCategoryEnum>, subcategory: '' }));
-              }}>
-                <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+              <Label htmlFor="businessName" className="flex items-center gap-2 text-muted-foreground">
+                <Building size={16}/>
+                Business Name (Optional)
+              </Label>
+              <Input
+                id="businessName"
+                type="text"
+                value={formData.businessName || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
+                placeholder="e.g., John's Plumbing"
+                className="mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+            <div>
+              <Label htmlFor="category" className="text-muted-foreground">Service Category *</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData(prev => ({...prev, category: value as SignUpData['category'], subcategory: ''}))}
+              >
+                <SelectTrigger className={`mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('category') ? 'border-red-500' : ''}`}>
+                  <SelectValue placeholder="Select a service category" />
+                </SelectTrigger>
                 <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                  ))}
+                  {categories.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
                 </SelectContent>
               </Select>
               {getError('category') && <p className="text-sm text-red-500 mt-1">{getError('category')}</p>}
             </div>
-
             {selectedCategory && (
               <div>
-                <Label htmlFor="subcategory">Specialization *</Label>
-                {formData.category === 'other' ? (
-                  <Input
-                    id="subcategory"
-                    type="text"
-                    value={formData.subcategory || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, subcategory: e.target.value }))}
-                    placeholder="Please specify your service"
-                    required
-                  />
-                ) : (
-                  <Select value={formData.subcategory} onValueChange={(value) => {
-                    setFormData(prev => ({ ...prev, subcategory: value }));
-                  }}>
-                    <SelectTrigger><SelectValue placeholder="Select specialization" /></SelectTrigger>
-                    <SelectContent>
-                      {selectedCategory.subcategories.map(sub => (
-                        <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                <Label htmlFor="subcategory" className="text-muted-foreground">Specialization *</Label>
+                <Select
+                  value={formData.subcategory}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, subcategory: value }))}
+                >
+                  <SelectTrigger className={`mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${getError('subcategory') ? 'border-red-500' : ''}`}>
+                    <SelectValue placeholder="Select a specialization" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedCategory.subcategories.map(sub => <SelectItem key={sub} value={sub}>{sub}</SelectItem>)}
+                  </SelectContent>
+                </Select>
                 {getError('subcategory') && <p className="text-sm text-red-500 mt-1">{getError('subcategory')}</p>}
               </div>
             )}
-
-            <div>
-              <Label htmlFor="businessName">Business Name (Optional)</Label>
-              <Input 
-                id="businessName" 
-                type="text" 
-                value={formData.businessName || ''}
-                onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
-                placeholder="Your business name" 
-              />
-            </div>
           </>
         )}
 
         <div>
-          <Label className="flex items-center gap-2">
+          <Label className="flex items-center gap-2 mb-2 text-muted-foreground">
             <MapPin size={16} />
-            Your Location *
+            Location *
           </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
-            <Input
-              type="text"
-              placeholder="City / Address"
-              disabled
-              value={formData.location?.address || ''}
-            />
-            <Input
-              type="text"
-              placeholder="Lat / Lon"
-              disabled
-              value={formData.location ? `${formData.location.coordinates[0].toFixed(4)}, ${formData.location.coordinates[1].toFixed(4)}` : ''}
-            />
+          <div 
+            className={`mt-1 p-3 border rounded-md cursor-pointer hover:border-primary transition-colors ${getError('location') ? 'border-red-500' : ''}`}
+            onClick={() => setIsMapOpen(true)}
+          >
+            {formData.location ? (
+              <span className="text-foreground">{formData.location.address}</span>
+            ) : (
+              <span className="text-muted-foreground">Click to select location on map</span>
+            )}
           </div>
-          <Button type="button" variant="outline" className="w-full mt-2" onClick={() => setIsMapOpen(true)}>
-            Pick on Map
-          </Button>
           {getError('location') && <p className="text-sm text-red-500 mt-1">{getError('location')}</p>}
         </div>
-        
-        {isMapOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-2xl">
-              <h3 className="text-lg font-semibold mb-2">Select Your Location</h3>
-              <Suspense fallback={<div>Loading Map...</div>}>
-                <MapPicker onSelect={handleLocationSelect} />
-              </Suspense>
-              <Button type="button" variant="ghost" className="mt-2" onClick={() => setIsMapOpen(false)}>Close</Button>
-            </div>
-          </div>
-        )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <Button 
+          type="submit" 
+          className="w-full font-bold py-3 text-base transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? 'Creating Account...' : 'Create Account'}
         </Button>
-
+        
         <div className="text-center text-sm text-muted-foreground">
-          Already have an account?{' '}
+           Already have an account?{' '}
           <button
             type="button"
             className="text-primary hover:underline font-medium"
@@ -399,6 +379,25 @@ const WorkerSignUp: React.FC = () => {
           </button>
         </div>
       </form>
+
+      {isMapOpen && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center text-white">Loading Map...</div>}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-card p-4 rounded-lg w-full max-w-4xl h-[80vh] relative shadow-2xl">
+              <h3 className="text-lg font-medium text-center mb-4">Select Your Location</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-10 rounded-full"
+                onClick={() => setIsMapOpen(false)}
+              >
+                <EyeOff className="h-4 w-4" />
+              </Button>
+              <MapPicker onSelect={handleLocationSelect} />
+            </div>
+          </div>
+        </Suspense>
+      )}
     </div>
   );
 };

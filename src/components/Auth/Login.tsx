@@ -84,15 +84,15 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="text-center mb-6">
+    <div className="w-full">
+      <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-foreground">Welcome Back</h2>
-        <p className="text-muted-foreground mt-2">Sign in to your account</p>
+        <p className="text-muted-foreground mt-1">Sign in to continue your journey.</p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <Label htmlFor="email" className="flex items-center gap-2">
+          <Label htmlFor="email" className="flex items-center gap-2 text-muted-foreground">
             <Mail size={16} />
             Email Address
           </Label>
@@ -101,26 +101,26 @@ const Login: React.FC = () => {
             type="email"
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-            placeholder="Enter your email"
-            className={errors.email ? 'border-red-500' : ''}
+            placeholder="you@example.com"
+            className={`mt-1 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${errors.email ? 'border-red-500' : ''}`}
             disabled={isSubmitting}
           />
           {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
         </div>
 
         <div>
-          <Label htmlFor="password" className="flex items-center gap-2">
+          <Label htmlFor="password" className="flex items-center gap-2 text-muted-foreground">
             <Lock size={16} />
             Password
           </Label>
-          <div className="relative">
+          <div className="relative mt-1">
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
               placeholder="Enter your password"
-              className={errors.password ? 'border-red-500 pr-10' : 'pr-10'}
+              className={`pr-10 transition-all duration-300 focus:border-primary focus:ring-2 focus:ring-primary/50 ${errors.password ? 'border-red-500' : ''}`}
               disabled={isSubmitting}
             />
             <button
@@ -135,12 +135,11 @@ const Login: React.FC = () => {
           {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-end">
           <button
             type="button"
             className="text-sm text-primary hover:underline"
             onClick={() => {
-              // TODO: Implement forgot password
               toast({
                 title: "Coming Soon",
                 description: "Password reset functionality will be available soon.",
@@ -153,7 +152,7 @@ const Login: React.FC = () => {
 
         <Button 
           type="submit" 
-          className="w-full" 
+          className="w-full font-bold py-3 text-base transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5" 
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Signing In...' : 'Sign In'}
@@ -165,7 +164,6 @@ const Login: React.FC = () => {
             type="button"
             className="text-primary hover:underline font-medium"
             onClick={() => {
-              // This will be handled by the parent component to switch tabs
               const event = new CustomEvent('switchToSignup');
               window.dispatchEvent(event);
             }}

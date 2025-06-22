@@ -104,22 +104,34 @@ const Auth = () => {
   }, []);
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 p-2 sm:p-4">
-      <div className="w-full max-w-lg">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="login">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login" className="mt-0">
-            <Login />
-          </TabsContent>
-          
-          <TabsContent value="signup" className="mt-0">
-            <WorkerSignUp />
-          </TabsContent>
-        </Tabs>
+    <div className="w-full min-h-screen flex items-center justify-center animated-gradient p-4">
+      <div className="w-full max-w-4xl flex bg-card rounded-2xl shadow-2xl overflow-hidden">
+        {/* Left decorative panel */}
+        <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-primary/10 p-12 text-center text-primary-foreground">
+          <img src="/WorkKar icon.png" alt="WorkKar Logo" className="w-24 h-24 mb-6 rounded-full shadow-lg"/>
+          <h1 className="text-3xl font-bold text-foreground">Welcome to WorkKar</h1>
+          <p className="mt-4 text-muted-foreground">
+            Connecting you with the best local professionals for any job, big or small.
+          </p>
+        </div>
+
+        {/* Right form panel */}
+        <div className="w-full md:w-1/2 p-8 sm:p-12">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login" className="mt-0">
+              <Login />
+            </TabsContent>
+            
+            <TabsContent value="signup" className="mt-0">
+              <WorkerSignUp />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

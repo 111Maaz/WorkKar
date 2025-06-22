@@ -42,7 +42,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onSelec
               <button
                 key={category}
                 onClick={() => onSelectCategory(category)}
-                className="group relative flex flex-col items-center justify-center p-4 bg-card/60 dark:bg-card/50 backdrop-blur-sm rounded-lg border border-border/20 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 overflow-hidden"
+                className="group relative flex flex-col items-center justify-center p-4 bg-card/60 dark:bg-card/50 backdrop-blur-sm rounded-lg border border-border/30 shadow-md hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{backgroundSize: '200% 200%'}}></div>
                 <div className="relative z-10 flex flex-col items-center w-full">

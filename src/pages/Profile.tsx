@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { Label } from '@/components/UI/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/UI/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/UI/card';
 import { Badge } from '@/components/UI/badge';
-import LocationInput from '@/components/UI/LocationInput';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle } from 'lucide-react';
+import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit, X, Save, Building, Star, MessageSquare } from 'lucide-react';
+import { Skeleton } from '@/components/UI/skeleton';
+
+const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
 interface UserProfile {
   id: string;
@@ -44,6 +45,65 @@ interface WorkerProfile {
   updated_at: string;
 }
 
+const ProfileField = ({ icon, label, value, isEditing, children }: { icon: React.ReactNode, label: string, value: React.ReactNode, isEditing?: boolean, children?: React.ReactNode }) => (
+  <div className="flex items-start gap-4 py-4">
+    <div className="flex items-center gap-3 text-muted-foreground w-40">
+      {icon}
+      <span className="font-medium">{label}</span>
+    </div>
+    <div className="flex-1">
+      {isEditing ? children : <div className="text-foreground">{value || <span className="text-muted-foreground/80">Not set</span>}</div>}
+    </div>
+  </div>
+);
+
+
+const ProfilePageSkeleton = () => (
+  <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-1">
+        <Card>
+          <CardHeader className="items-center text-center">
+            <Skeleton className="h-24 w-24 rounded-full" />
+            <Skeleton className="h-6 w-3/4 mt-4" />
+            <Skeleton className="h-4 w-1/2 mt-2" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-full" />
+          </CardContent>
+          <CardFooter className="flex-col items-start gap-2">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </CardFooter>
+        </Card>
+      </div>
+      <div className="lg:col-span-2">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-full mt-2" />
+          </CardHeader>
+          <CardContent className="divide-y">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-start gap-4 py-4">
+                <div className="flex items-center gap-3 text-muted-foreground w-40">
+                  <Skeleton className="h-6 w-6 rounded" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                <div className="flex-1">
+                  <Skeleton className="h-5 w-3/4" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
+);
+
+
 const Profile: React.FC = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
@@ -51,6 +111,7 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -121,6 +182,7 @@ const Profile: React.FC = () => {
             mobile_number: editForm.mobile_number,
             business_name: editForm.business_name,
             location_address: editForm.location_address,
+            location_coordinates: editForm.location_coordinates,
           })
           .eq('user_id', user.id);
         error = updateError;
@@ -132,6 +194,7 @@ const Profile: React.FC = () => {
             full_name: editForm.full_name,
             mobile_number: editForm.mobile_number,
             location_address: editForm.location_address,
+            location_coordinates: editForm.location_coordinates,
           })
           .eq('id', user.id);
         error = updateError;
@@ -154,12 +217,27 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleLocationSelect = (location: { address: string; coordinates: [number, number] }) => {
-    setEditForm(prev => ({
-      ...prev,
-      location_coordinates: `POINT(${location.coordinates[1]} ${location.coordinates[0]})`,
-      location_address: location.address
-    }));
+  const handleLocationSelect = async (coords: [number, number]) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}`);
+      const data = await response.json();
+      const address = data.display_name || `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
+
+      setEditForm(prev => ({
+        ...prev,
+        // Correctly format for PostGIS geography type
+        location_coordinates: `POINT(${coords[1]} ${coords[0]})`,
+        location_address: address
+      }));
+    } catch (error) {
+      console.error("Reverse geocoding failed:", error);
+      setEditForm(prev => ({
+        ...prev,
+        location_coordinates: `POINT(${coords[1]} ${coords[0]})`,
+        location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`
+      }));
+    }
+    setIsMapOpen(false);
   };
 
   const handleSignOut = async () => {
@@ -180,11 +258,7 @@ const Profile: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="text-center">Loading profile...</div>
-      </div>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (!user) {
@@ -215,209 +289,133 @@ const Profile: React.FC = () => {
   const isWorker = 'service_category' in profile;
   const userType = isWorker ? 'skilled_professional' : profile.user_type;
 
+  const renderProfileDetails = () => (
+    <>
+      <ProfileField icon={<User size={18} />} label="Full Name" value={profile.full_name} isEditing={isEditing}>
+        <Input value={editForm.full_name || ''} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} />
+      </ProfileField>
+      <ProfileField icon={<Phone size={18} />} label="Mobile" value={profile.mobile_number} isEditing={isEditing}>
+        <Input value={editForm.mobile_number || ''} onChange={(e) => setEditForm({ ...editForm, mobile_number: e.target.value })} />
+      </ProfileField>
+      <ProfileField icon={<MapPin size={18} />} label="Location" value={profile.location_address} isEditing={isEditing}>
+        <div className="flex flex-col gap-2">
+            <p className="text-sm p-3 border rounded-md min-h-[40px]">
+                {editForm.location_address || <span className="text-muted-foreground">No address selected</span>}
+            </p>
+            <Button variant="outline" onClick={() => setIsMapOpen(true)}>
+                {editForm.location_address ? "Change on Map" : "Pick on Map"}
+            </Button>
+        </div>
+      </ProfileField>
+      {isWorker && (
+        <>
+          <ProfileField icon={<Building size={18} />} label="Business Name" value={(profile as WorkerProfile).business_name} isEditing={isEditing}>
+            <Input value={editForm.business_name || ''} onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })} />
+          </ProfileField>
+          <ProfileField icon={<Briefcase size={18} />} label="Service" value={`${(profile as WorkerProfile).service_category} - ${(profile as WorkerProfile).service_subcategory}`} />
+          <ProfileField icon={<Star size={18} />} label="Rating" value={
+            <div className="flex items-center gap-2">
+                <Badge variant="secondary">{ (profile as WorkerProfile).rating ? (profile as WorkerProfile).rating.toFixed(1) : 'N/A' }</Badge>
+                <span className="text-muted-foreground text-sm">from {(profile as WorkerProfile).total_reviews} reviews</span>
+            </div>
+          }/>
+        </>
+      )}
+    </>
+  );
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">My Profile</h1>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setIsEditing(!isEditing)}
-            variant={isEditing ? "outline" : "default"}
-          >
-            {isEditing ? "Cancel" : "Edit Profile"}
-          </Button>
-          <Button 
-            onClick={handleSignOut}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <LogOut size={16} />
-            Sign Out
-          </Button>
+    <div className="bg-muted/40 w-full">
+      <div className="container mx-auto px-4 py-12 max-w-6xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <div className="lg:col-span-1">
+            <Card className="overflow-hidden shadow-sm">
+              <CardHeader className="items-center text-center p-6 bg-gradient-to-br from-card to-card/95">
+                <div className="relative">
+                  <img
+                    src={`https://api.dicebear.com/8.x/initials/svg?seed=${profile.full_name || 'User'}`}
+                    alt="Profile Avatar"
+                    className="h-24 w-24 rounded-full border-4 border-background shadow-lg"
+                  />
+                  <Badge variant={userType === 'skilled_professional' ? "default" : "secondary"} className="absolute bottom-0 right-0 -translate-x-1 translate-y-1">
+                    {userType === 'skilled_professional' ? 'Worker' : 'User'}
+                  </Badge>
+                </div>
+                <CardTitle className="mt-4 text-xl">{profile.full_name || 'User'}</CardTitle>
+                <CardDescription className="flex items-center gap-2 mt-1">
+                  <Mail size={14} /> {profile.email}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-2"><Shield size={16} /> Verification</span>
+                    {profile.email_verified ? (
+                        <Badge variant="outline" className="text-green-600 border-green-600/50">
+                            <CheckCircle size={14} className="mr-1" /> Verified
+                        </Badge>
+                    ) : (
+                        <Badge variant="destructive">Not Verified</Badge>
+                    )}
+                </div>
+              </CardContent>
+              <CardFooter className="p-4 border-t">
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="ghost"
+                    className="w-full text-destructive-foreground bg-destructive/90 hover:bg-destructive"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+              </CardFooter>
+            </Card>
+          </div>
+          
+          <div className="lg:col-span-2">
+            <Card className="shadow-sm">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="text-2xl">Profile Information</CardTitle>
+                        <CardDescription>View and edit your personal details.</CardDescription>
+                    </div>
+                    {isEditing ? (
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}><X className="h-4 w-4 mr-2" /> Cancel</Button>
+                            <Button size="sm" onClick={handleSave}><Save className="h-4 w-4 mr-2" /> Save</Button>
+                        </div>
+                    ) : (
+                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
+                    )}
+                </div>
+              </CardHeader>
+              <CardContent className="divide-y divide-border">
+                {renderProfileDetails()}
+              </CardContent>
+            </Card>
+          </div>
+
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User size={20} />
-            Personal Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isEditing ? (
-            <>
-              <div>
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  value={editForm.full_name || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, full_name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="mobile">Mobile Number</Label>
-                <Input
-                  id="mobile"
-                  value={editForm.mobile_number || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, mobile_number: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  value={editForm.email || ''}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-sm text-muted-foreground mt-1">Email cannot be changed</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-2">
-                <User size={16} />
-                <span className="font-medium">{profile.full_name || 'Not provided'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone size={16} />
-                <span>{profile.mobile_number || 'Not provided'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail size={16} />
-                <span>{profile.email}</span>
-                {profile.email_verified ? (
-                  <CheckCircle size={16} className="text-green-500" />
-                ) : (
-                  <Shield size={16} className="text-yellow-500" />
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant={userType === 'skilled_professional' ? 'default' : 'secondary'}>
-                  {userType === 'skilled_professional' ? 'Skilled Professional' : 'General User'}
-                </Badge>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {isWorker && (
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Briefcase size={20} />
-              Service Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isEditing ? (
-              <>
-                <div>
-                  <Label htmlFor="businessName">Business Name</Label>
-                  <Input
-                    id="businessName"
-                    value={editForm.business_name || ''}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, business_name: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Service Category</Label>
-                  <Input
-                    id="category"
-                    value={editForm.service_category || ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">Category cannot be changed</p>
-                </div>
-                <div>
-                  <Label htmlFor="subcategory">Specialization</Label>
-                  <Input
-                    id="subcategory"
-                    value={editForm.service_subcategory || ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">Specialization cannot be changed</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <span className="font-medium">Business: </span>
-                  <span>{profile.business_name || 'Not provided'}</span>
-                </div>
-                <div>
-                  <span className="font-medium">Category: </span>
-                  <span>{profile.service_category}</span>
-                </div>
-                <div>
-                  <span className="font-medium">Specialization: </span>
-                  <span>{profile.service_subcategory}</span>
-                </div>
-                {profile.rating !== null && (
-                  <div>
-                    <span className="font-medium">Rating: </span>
-                    <span>{profile.rating}/5 ({profile.total_reviews} reviews)</span>
-                  </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin size={20} />
-            Location
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isEditing ? (
-            <div>
-              <Label>Location</Label>
-              <Input
-                value={editForm.location_address || ''}
-                onChange={(e) => setEditForm(prev => ({ ...prev, location_address: e.target.value }))}
-                placeholder="Enter your location"
-              />
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full mt-2"
-                onClick={() => {
-                  // TODO: Implement map picker
-                  toast({
-                    title: "Coming Soon",
-                    description: "Map location picker will be available soon.",
-                  });
-                }}
+      {isMapOpen && (
+        <Suspense fallback={<div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center text-white">Loading Map...</div>}>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div className="bg-card p-4 rounded-lg w-full max-w-4xl h-[80vh] relative shadow-2xl">
+              <h3 className="text-lg font-medium text-center mb-4">Select Your Location</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-10 rounded-full"
+                onClick={() => setIsMapOpen(false)}
               >
-                Pick on Map
+                <X className="h-4 w-4" />
               </Button>
+              <MapPicker onSelect={handleLocationSelect} />
             </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <MapPin size={16} />
-              <span>{profile.location_address || 'Location not set'}</span>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {isEditing && (
-        <div className="flex gap-2 mt-6">
-          <Button onClick={handleSave} className="flex-1">
-            Save Changes
-          </Button>
-          <Button onClick={() => setIsEditing(false)} variant="outline" className="flex-1">
-            Cancel
-          </Button>
-        </div>
+          </div>
+        </Suspense>
       )}
     </div>
   );
