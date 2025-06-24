@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
   id: string;
@@ -22,6 +24,10 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [promoting, setPromoting] = useState<string | null>(null);
+  const [changeRequests, setChangeRequests] = useState<any[]>([]);
+  const [changeModalOpen, setChangeModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const { toast } = useToast();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -39,8 +45,14 @@ export default function Users() {
     setLoading(false);
   };
 
+  const fetchChangeRequests = async () => {
+    const { data } = await supabase.from('change_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+    setChangeRequests(data || []);
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchChangeRequests();
     // eslint-disable-next-line
   }, [search, page]);
 
@@ -54,6 +66,20 @@ export default function Users() {
     await supabase.from('admins').upsert({ id: user.id });
     setPromoting(null);
     alert(`${user.full_name} is now an admin.`);
+  };
+
+  const handleApprove = async (req: any) => {
+    // Update user profile
+    await supabase.from('profiles').update({ [req.field]: req.requested_value }).eq('id', req.user_id);
+    // Mark request as approved
+    await supabase.from('change_requests').update({ status: 'approved', admin_response: 'Approved and updated.' }).eq('id', req.id);
+    toast({ title: 'Request approved', description: 'Profile updated.' });
+    fetchChangeRequests();
+  };
+  const handleReject = async (req: any) => {
+    await supabase.from('change_requests').update({ status: 'rejected', admin_response: 'Rejected by admin.' }).eq('id', req.id);
+    toast({ title: 'Request rejected' });
+    fetchChangeRequests();
   };
 
   return (
@@ -140,6 +166,34 @@ export default function Users() {
           </div>
         </div>
       )}
+      {/* Change Requests Modal */}
+      <Dialog open={changeModalOpen} onOpenChange={setChangeModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pending Change Requests</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+            {changeRequests.length === 0 ? (
+              <div className="text-muted-foreground">No pending requests.</div>
+            ) : changeRequests.map(req => (
+              <div key={req.id} className="p-3 rounded-lg bg-muted/30 border flex flex-col gap-1">
+                <div><span className="font-semibold">User ID:</span> {req.user_id}</div>
+                <div><span className="font-semibold">Field:</span> {req.field}</div>
+                <div><span className="font-semibold">Current Value:</span> {req.current_value}</div>
+                <div><span className="font-semibold">Requested Value:</span> {req.requested_value}</div>
+                <div><span className="font-semibold">Reason:</span> {req.reason || <span className="italic text-muted-foreground">(none)</span>}</div>
+                <div className="flex gap-2 mt-2">
+                  <Button size="sm" variant="default" onClick={() => handleApprove(req)}>Approve</Button>
+                  <Button size="sm" variant="destructive" onClick={() => handleReject(req)}>Reject</Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setChangeModalOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

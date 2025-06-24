@@ -11,6 +11,8 @@ import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit
 import { Skeleton } from '@/components/UI/skeleton';
 import { useNavigate } from 'react-router-dom';
 import BottomNavigation from '@/components/Layout/BottomNavigation';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
+import { Textarea } from '@/components/UI/textarea';
 
 const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
@@ -115,6 +117,11 @@ const Profile: React.FC = () => {
   const [editForm, setEditForm] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isMapOpen, setIsMapOpen] = useState(false);
+  const [changeModalOpen, setChangeModalOpen] = useState(false);
+  const [changeField, setChangeField] = useState('');
+  const [changeValue, setChangeValue] = useState('');
+  const [changeReason, setChangeReason] = useState('');
+  const [submittingChange, setSubmittingChange] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -260,6 +267,37 @@ const Profile: React.FC = () => {
     }
   };
 
+  const openChangeModal = (field: string, currentValue: string) => {
+    setChangeField(field);
+    setChangeValue('');
+    setChangeReason('');
+    setChangeModalOpen(true);
+  };
+
+  const handleChangeRequest = async () => {
+    if (!user) return;
+    if (!changeField || !changeValue) {
+      toast({ title: 'Missing fields', description: 'Please fill all fields.', variant: 'destructive' });
+      return;
+    }
+    setSubmittingChange(true);
+    const { error } = await supabase.from('change_requests').insert({
+      user_id: user.id,
+      field: changeField,
+      current_value: profile ? profile[changeField] : '',
+      requested_value: changeValue,
+      reason: changeReason,
+      status: 'pending',
+    });
+    setSubmittingChange(false);
+    setChangeModalOpen(false);
+    if (error) {
+      toast({ title: 'Request failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Request submitted', description: 'Your change request has been sent to the admin.' });
+    }
+  };
+
   if (loading) {
     return <ProfilePageSkeleton />;
   }
@@ -336,6 +374,9 @@ const Profile: React.FC = () => {
           )}
         </div>
       )}
+      <ProfileField icon={<Mail size={18} />} label="Email" value={profile.email}>
+        <Button size="sm" variant="outline" onClick={() => openChangeModal('email', profile.email || '')}>Request Change</Button>
+      </ProfileField>
     </>
   );
 
@@ -433,6 +474,33 @@ const Profile: React.FC = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
         <BottomNavigation />
       </div>
+
+      {/* Change Request Modal */}
+      <Dialog open={changeModalOpen} onOpenChange={setChangeModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Profile Change</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block mb-1 font-medium">Field</label>
+              <Input value={changeField} disabled />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">New Value</label>
+              <Input value={changeValue} onChange={e => setChangeValue(e.target.value)} placeholder="Enter new value" />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">Reason (optional)</label>
+              <Textarea value={changeReason} onChange={e => setChangeReason(e.target.value)} placeholder="Why do you want this change?" rows={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setChangeModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleChangeRequest} disabled={submittingChange}>{submittingChange ? 'Submitting...' : 'Submit Request'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

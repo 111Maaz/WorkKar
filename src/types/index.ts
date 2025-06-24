@@ -23,6 +23,7 @@ export interface Worker {
   joined: string; // ISO date string
   mobile: string; // New field for mobile number
   businessName?: string; // Optional business name
+  verification_status?: string; // 'approved', 'pending', 'rejected', etc.
 }
 
 export interface Category {

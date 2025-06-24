@@ -83,7 +83,8 @@ const Index = () => {
             bio: '', availability: true,
             joined: new Date(worker.created_at).toLocaleDateString(),
             mobile: worker.mobile_number,
-            businessName: worker.business_name || ''
+            businessName: worker.business_name || '',
+            verification_status: worker.verification_status || undefined,
           };
         } catch (e) {
           console.error('Failed to process a worker record:', worker, e);

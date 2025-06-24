@@ -82,7 +82,13 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
           
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg text-foreground">{worker.name}</h3>
+              <h3 className="font-semibold text-lg text-foreground">{worker.name}
+                {worker.verification_status === 'approved' && (
+                  <span title="Approved Worker" className="inline-flex items-center ml-1 text-green-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </span>
+                )}
+              </h3>
               {worker.availability && <div className="w-2.5 h-2.5 bg-green-500 rounded-full" title="Available now"></div>}
             </div>
             <p className="text-muted-foreground text-sm font-medium">{worker.category}</p>
