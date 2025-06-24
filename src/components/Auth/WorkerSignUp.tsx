@@ -167,6 +167,12 @@ const WorkerSignUp: React.FC = () => {
 
   return (
     <div className="w-full">
+      {/* Back button for mobile */}
+      <div className="md:hidden px-4 pt-4">
+        <Button variant="ghost" size="icon" onClick={() => window.history.back()} aria-label="Go back">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </Button>
+      </div>
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-foreground">Create Your Account</h2>
         <p className="text-muted-foreground mt-1">Join our community of professionals.</p>

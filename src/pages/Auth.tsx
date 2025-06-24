@@ -107,6 +107,12 @@ const Auth = () => {
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center animated-gradient p-4">
+      {/* Back button for mobile */}
+      <div className="md:hidden px-4 pt-4 absolute left-0 top-0 z-50">
+        <Button variant="ghost" size="icon" onClick={() => window.history.back()} aria-label="Go back">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+        </Button>
+      </div>
       <div className="w-full max-w-4xl flex bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* Left decorative panel */}
         <div className="hidden md:flex flex-col items-center justify-center w-1/2 bg-primary/10 p-12 text-center text-primary-foreground">

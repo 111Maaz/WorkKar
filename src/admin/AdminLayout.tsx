@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { LogOut, Menu, X } from 'lucide-react';
 
 const navItems = [
+  { label: 'Back to Dashboard', path: '/' },
   { label: 'Dashboard', path: '/admin' },
   { label: 'Users', path: '/admin/users' },
   { label: 'Workers', path: '/admin/workers' },

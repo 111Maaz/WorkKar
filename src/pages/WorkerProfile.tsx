@@ -12,6 +12,7 @@ import { Badge } from '@/components/UI/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { Skeleton } from '@/components/UI/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import BottomNavigation from '@/components/Layout/BottomNavigation';
 
 const WorkerProfileSkeleton = () => (
   <div className="container mx-auto p-4 md:p-8">
@@ -305,6 +306,10 @@ const WorkerProfilePage = () => {
               </Card>
           </div>
         </div>
+      </div>
+      {/* Bottom navigation for mobile */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
+        <BottomNavigation />
       </div>
     </div>
   );

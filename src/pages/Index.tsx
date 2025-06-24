@@ -44,6 +44,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from('workers')
         .select('*')
+        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit, X, Save, Building, Star, MessageSquare, ChevronLeft } from 'lucide-react';
 import { Skeleton } from '@/components/UI/skeleton';
 import { useNavigate } from 'react-router-dom';
+import BottomNavigation from '@/components/Layout/BottomNavigation';
 
 const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
@@ -323,6 +324,18 @@ const Profile: React.FC = () => {
           }/>
         </>
       )}
+      {user && user.id !== profile.id && (
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground flex items-center gap-2"><Shield size={16} /> Verification</span>
+          {profile.email_verified ? (
+            <Badge variant="outline" className="text-green-600 border-green-600/50">
+              <CheckCircle size={14} className="mr-1" /> Verified
+            </Badge>
+          ) : (
+            <Badge variant="destructive">Not Verified</Badge>
+          )}
+        </div>
+      )}
     </>
   );
 
@@ -356,16 +369,7 @@ const Profile: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground flex items-center gap-2"><Shield size={16} /> Verification</span>
-                    {profile.email_verified ? (
-                        <Badge variant="outline" className="text-green-600 border-green-600/50">
-                            <CheckCircle size={14} className="mr-1" /> Verified
-                        </Badge>
-                    ) : (
-                        <Badge variant="destructive">Not Verified</Badge>
-                    )}
-                </div>
+                {renderProfileDetails()}
               </CardContent>
               <CardFooter className="p-4 border-t">
                   <Button 
@@ -425,6 +429,10 @@ const Profile: React.FC = () => {
           </div>
         </Suspense>
       )}
+      {/* Bottom navigation for mobile */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
+        <BottomNavigation />
+      </div>
     </div>
   );
 };
