@@ -7,8 +7,9 @@ import { Badge } from '@/components/UI/badge';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit, X, Save, Building, Star, MessageSquare } from 'lucide-react';
+import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit, X, Save, Building, Star, MessageSquare, ChevronLeft } from 'lucide-react';
 import { Skeleton } from '@/components/UI/skeleton';
+import { useNavigate } from 'react-router-dom';
 
 const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
@@ -107,6 +108,7 @@ const ProfilePageSkeleton = () => (
 const Profile: React.FC = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | WorkerProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
@@ -326,6 +328,12 @@ const Profile: React.FC = () => {
 
   return (
     <div className="bg-muted/40 w-full">
+      {/* Back button for mobile */}
+      <div className="md:hidden px-4 pt-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+      </div>
       <div className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           

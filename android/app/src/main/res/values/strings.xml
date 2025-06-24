@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">WorkKar</string>
+    <string name="title_activity_main">WorkKar</string>
+    <string name="package_name">com.WorkKar.app</string>
+    <string name="custom_url_scheme">com.WorkKar.app</string>
+</resources>

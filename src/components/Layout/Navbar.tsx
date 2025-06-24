@@ -51,17 +51,35 @@ const Navbar: React.FC = () => {
                   <LogOut size={18} />
                   <span>Sign Out</span>
                 </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
+                  asChild
+                >
+                  <a href="/admin" target="_blank" rel="noopener noreferrer">Admin Panel</a>
+                </Button>
               </>
             ) : (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
-                onClick={() => window.location.href = '/auth'}
-              >
-                <User size={18} />
-                <span>Sign In</span>
-              </Button>
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
+                  onClick={() => window.location.href = '/auth'}
+                >
+                  <User size={18} />
+                  <span>Sign In</span>
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="flex items-center gap-2 transition-all duration-300 hover:shadow-md hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-background" 
+                  asChild
+                >
+                  <a href="/admin" target="_blank" rel="noopener noreferrer">Admin Panel</a>
+                </Button>
+              </>
             )}
             <ThemeToggle />
           </div>
@@ -105,17 +123,37 @@ const Navbar: React.FC = () => {
               >
                 Sign Out
               </button>
+              <a
+                href="/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-left px-3 py-2 text-base font-medium text-primary hover:underline hover:bg-muted rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin Panel
+              </a>
             </>
           ) : (
-            <button 
-              onClick={() => {
-                window.location.href = '/auth';
-                setIsOpen(false);
-              }}
-              className="block w-full text-left px-3 py-2 text-base font-medium text-foreground/80 hover:text-primary hover:bg-muted rounded-md"
-            >
-              Sign In
-            </button>
+            <>
+              <button 
+                onClick={() => {
+                  window.location.href = '/auth';
+                  setIsOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-foreground/80 hover:text-primary hover:bg-muted rounded-md"
+              >
+                Sign In
+              </button>
+              <a
+                href="/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-left px-3 py-2 text-base font-medium text-primary hover:underline hover:bg-muted rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Admin Panel
+              </a>
+            </>
           )}
         </div>
       </div>

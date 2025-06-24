@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/UI/avatar';
 import RatingStars from '@/components/UI/RatingStars';
 import { Button } from '@/components/UI/button';
 import { Textarea } from '@/components/UI/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/UI/card';
-import { MapPin, Phone, Star, Briefcase, Mail, Building, Send } from 'lucide-react';
+import { MapPin, Phone, Star, Briefcase, Mail, Building, Send, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/UI/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
@@ -60,6 +60,7 @@ const WorkerProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [worker, setWorker] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,6 +165,12 @@ const WorkerProfilePage = () => {
 
   return (
     <div className="bg-muted/30">
+      {/* Back button for mobile */}
+      <div className="md:hidden px-4 pt-4">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+      </div>
       <div className="container mx-auto p-4 md:p-8">
         <Card className="mb-8 overflow-hidden border-0 shadow-lg">
           <div className="h-32 bg-gradient-to-r from-primary/10 to-primary/30" />
