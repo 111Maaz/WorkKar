@@ -9,6 +9,7 @@ const Reviews = React.lazy(() => import('./pages/Reviews'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const Categories = React.lazy(() => import('./pages/Categories'));
 const AuditLog = React.lazy(() => import('./pages/AuditLog'));
+const ChangeRequests = React.lazy(() => import('./pages/ChangeRequests'));
 
 export default function AdminRoutes() {
   return (
@@ -20,6 +21,7 @@ export default function AdminRoutes() {
           <Route path="workers" element={<Workers />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="change-requests" element={<ChangeRequests />} />
           <Route path="categories" element={<Categories />} />
           <Route path="audit-log" element={<AuditLog />} />
         </Route>

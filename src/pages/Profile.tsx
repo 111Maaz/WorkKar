@@ -338,6 +338,9 @@ const Profile: React.FC = () => {
       <ProfileField icon={<Phone size={18} />} label="Mobile" value={profile.mobile_number} isEditing={isEditing}>
         <Input value={editForm.mobile_number || ''} onChange={(e) => setEditForm({ ...editForm, mobile_number: e.target.value })} />
       </ProfileField>
+      <ProfileField icon={<Mail size={18} />} label="Email" value={profile.email}>
+        <Button size="sm" variant="outline" onClick={() => openChangeModal('email', profile.email || '')}>Request Change</Button>
+      </ProfileField>
       <ProfileField icon={<MapPin size={18} />} label="Location" value={profile.location_address} isEditing={isEditing}>
         <div className="flex flex-col gap-2">
             <p className="text-sm p-3 border rounded-md min-h-[40px]">
@@ -353,7 +356,9 @@ const Profile: React.FC = () => {
           <ProfileField icon={<Building size={18} />} label="Business Name" value={(profile as WorkerProfile).business_name} isEditing={isEditing}>
             <Input value={editForm.business_name || ''} onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })} />
           </ProfileField>
-          <ProfileField icon={<Briefcase size={18} />} label="Service" value={`${(profile as WorkerProfile).service_category} - ${(profile as WorkerProfile).service_subcategory}`} />
+          <ProfileField icon={<Briefcase size={18} />} label="Service" value={`${(profile as WorkerProfile).service_category} - ${(profile as WorkerProfile).service_subcategory}`}>
+            <Button size="sm" variant="outline" onClick={() => openChangeModal('service_category', `${(profile as WorkerProfile).service_category} - ${(profile as WorkerProfile).service_subcategory}`)}>Request Change</Button>
+          </ProfileField>
           <ProfileField icon={<Star size={18} />} label="Rating" value={
             <div className="flex items-center gap-2">
                 <Badge variant="secondary">{ (profile as WorkerProfile).rating ? (profile as WorkerProfile).rating.toFixed(1) : 'N/A' }</Badge>
@@ -374,38 +379,24 @@ const Profile: React.FC = () => {
           )}
         </div>
       )}
-      <ProfileField icon={<Mail size={18} />} label="Email" value={profile.email}>
-        <Button size="sm" variant="outline" onClick={() => openChangeModal('email', profile.email || '')}>Request Change</Button>
-      </ProfileField>
     </>
   );
 
   return (
-    <div className="bg-muted/40 w-full">
-      {/* Back button for mobile */}
-      <div className="md:hidden px-4 pt-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-      </div>
+    <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen w-full">
       <div className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-1">
-            <Card className="overflow-hidden shadow-sm">
-              <CardHeader className="items-center text-center p-6 bg-gradient-to-br from-card to-card/95">
-                <div className="relative">
-                  <img
-                    src={`https://api.dicebear.com/8.x/initials/svg?seed=${profile.full_name || 'User'}`}
-                    alt="Profile Avatar"
-                    className="h-24 w-24 rounded-full border-4 border-background shadow-lg"
-                  />
-                  <Badge variant={userType === 'skilled_professional' ? "default" : "secondary"} className="absolute bottom-0 right-0 -translate-x-1 translate-y-1">
-                    {userType === 'skilled_professional' ? 'Worker' : 'User'}
-                  </Badge>
-                </div>
-                <CardTitle className="mt-4 text-xl">{profile.full_name || 'User'}</CardTitle>
-                <CardDescription className="flex items-center gap-2 mt-1">
+            <Card className="overflow-hidden shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+              <CardHeader className="items-center text-center p-6 bg-gradient-to-r from-blue-500 to-pink-500 text-white">
+                <img
+                  src={`https://api.dicebear.com/8.x/initials/svg?seed=${profile.full_name || 'User'}`}
+                  alt="Profile Avatar"
+                  className="h-24 w-24 rounded-full border-4 border-background shadow-lg mx-auto"
+                />
+                <CardTitle className="mt-4 text-xl font-extrabold drop-shadow-lg">{profile.full_name || 'User'}</CardTitle>
+                <CardDescription className="flex items-center gap-2 mt-1 text-white/90">
                   <Mail size={14} /> {profile.email}
                 </CardDescription>
               </CardHeader>
@@ -416,7 +407,7 @@ const Profile: React.FC = () => {
                   <Button 
                     onClick={handleSignOut}
                     variant="ghost"
-                    className="w-full text-destructive-foreground bg-destructive/90 hover:bg-destructive"
+                    className="w-full text-destructive-foreground bg-destructive/90 hover:bg-destructive font-bold rounded-lg transition-all duration-200"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out

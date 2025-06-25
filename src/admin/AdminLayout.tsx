@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Workers', path: '/admin/workers' },
   { label: 'Reviews', path: '/admin/reviews' },
   { label: 'Reports', path: '/admin/reports' },
+  { label: 'Change Requests', path: '/admin/change-requests' },
   { label: 'Categories', path: '/admin/categories' },
   { label: 'Audit Logs', path: '/admin/audit-log' },
 ];
@@ -25,9 +26,9 @@ const AdminLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Sidebar */}
-      <aside className={`fixed z-30 inset-y-0 left-0 w-64 bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-r p-4 shadow-xl transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-64 rounded-r-3xl md:rounded-none`}>
+      <aside className={`fixed z-30 inset-y-0 left-0 w-64 max-w-full bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-r p-4 shadow-xl transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-64 rounded-r-3xl md:rounded-none`}>
         <div className="flex items-center justify-between mb-8 md:hidden">
           <span className="text-xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">Admin Panel</span>
           <button onClick={() => setSidebarOpen(false)} className="text-foreground"><X size={24} /></button>
@@ -46,12 +47,12 @@ const AdminLayout: React.FC = () => {
       {/* Sidebar overlay for mobile */}
       {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />}
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen ml-0 md:ml-64 transition-all duration-300">
+      <div className="flex-1 flex flex-col min-h-screen w-full ml-0 md:ml-64 transition-all duration-300">
         <header className="flex items-center justify-between p-4 border-b bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg shadow-md md:hidden">
           <button onClick={() => setSidebarOpen(true)} className="text-foreground"><Menu size={24} /></button>
           <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">Admin Panel</span>
         </header>
-        <main className="flex-1 p-4 md:p-8">
+        <main className="flex-1 p-4 md:p-8 w-full">
           <Outlet />
         </main>
       </div>

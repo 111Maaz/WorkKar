@@ -9,12 +9,13 @@ import BottomNavigation from '@/components/Layout/BottomNavigation';
 import { Worker } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Index = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [filteredWorkers, setFilteredWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,6 +176,17 @@ const Index = () => {
   useEffect(() => {
     initializePage();
   }, [initializePage]);
+
+  // Focus search bar if focusSearch param is present
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('focusSearch') && searchInputRef.current) {
+      setTimeout(() => {
+        searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        searchInputRef.current?.focus();
+      }, 300);
+    }
+  }, [location.search]);
 
   // Handle search functionality
   const handleSearch = (query: string, location: string) => {

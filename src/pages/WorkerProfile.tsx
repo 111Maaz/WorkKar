@@ -172,9 +172,9 @@ const WorkerProfilePage = () => {
           <ChevronLeft className="h-5 w-5" />
         </Button>
       </div>
-      <div className="container mx-auto p-4 md:p-8">
-        <Card className="mb-8 overflow-hidden border-0 shadow-lg">
-          <div className="h-32 bg-gradient-to-r from-primary/10 to-primary/30" />
+      <div className="container mx-auto p-4 md:p-8 pb-24">
+        <Card className="mb-8 overflow-hidden border-0 shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+          <div className="h-32 bg-gradient-to-r from-blue-500 to-pink-500" />
           <CardContent className="p-6 pt-0">
             <div className="flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16">
                 <Avatar className="w-32 h-32 text-6xl border-4 border-background bg-muted shadow-lg">
@@ -184,7 +184,17 @@ const WorkerProfilePage = () => {
                     </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-center md:text-left">
-                  <h1 className="text-3xl font-bold">{worker.full_name}</h1>
+                  <h1 className="text-3xl font-bold flex items-center gap-2">
+                    {worker.full_name}
+                    {worker.verification_status === 'approved' && (
+                      <span className="inline-flex items-center ml-1" title="Verified Worker">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2L19 5V11C19 16.52 12 22 12 22C12 22 5 16.52 5 11V5L12 2Z" fill="#22c55e" stroke="#22c55e" strokeWidth="1.5"/>
+                          <path d="M9.5 12.5L11.5 14.5L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </span>
+                    )}
+                  </h1>
                   <p className="text-lg text-primary font-medium">{worker.service_category} - {worker.service_subcategory}</p>
                 </div>
                 <div className="flex items-center gap-2">

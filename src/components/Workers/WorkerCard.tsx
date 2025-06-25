@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapPin, Phone } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Phone, Flag, ShieldCheck } from 'lucide-react';
 import { Worker } from '@/types';
 import { Button } from '@/components/UI/button';
 import { cn } from '@/lib/utils';
@@ -7,6 +7,11 @@ import { Avatar, AvatarFallback } from "@/components/UI/avatar";
 import RatingStars from '@/components/UI/RatingStars';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
+import { Textarea } from '@/components/UI/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WorkerCardProps {
   worker: Worker;
@@ -34,6 +39,10 @@ const categoryColors: { [key: string]: string } = {
 const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation, onDistanceClick }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,20 +67,55 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
     // However, if logic were to change, we'd do nothing here.
   };
 
+  const handleReport = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'You must be signed in to report.', variant: 'destructive' });
+      return;
+    }
+    if (!reportReason) {
+      toast({ title: 'Missing reason', description: 'Please provide a reason for the report.', variant: 'destructive' });
+      return;
+    }
+    setSubmittingReport(true);
+    const { error } = await supabase.from('reports').insert({
+      reported_item_type: 'worker',
+      reported_item_id: worker.id,
+      reporter_id: user.id,
+      reason: reportReason,
+      status: 'pending',
+    });
+    setSubmittingReport(false);
+    setReportModalOpen(false);
+    setReportReason('');
+    if (error) {
+      toast({ title: 'Report failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Report submitted', description: 'Thank you for your feedback.' });
+    }
+  };
+
   const accentColor = categoryColors[worker.category] || categoryColors['default'];
 
   return (
     <div
       className={cn(
-        "bg-card rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out",
-        "border-l border-r border-b border-border/20",
-        "hover:shadow-xl hover:-translate-y-1.5 cursor-pointer",
+        "relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg rounded-2xl shadow-lg overflow-hidden transition-all duration-300 ease-in-out",
+        "border-l border-r border-b border-border/20 hover:shadow-2xl hover:-translate-y-1.5 hover:border-blue-400 hover:ring-2 hover:ring-blue-200",
         accentColor,
         "border-t-4",
         className
       )}
       onClick={handleCardClick}
     >
+      {/* Verified Shield Icon */}
+      {worker.verification_status === 'approved' && (
+        <span className="absolute top-3 right-3 z-10 bg-white/90 rounded-full shadow-lg p-1 flex items-center justify-center" title="Verified Worker">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L19 5V11C19 16.52 12 22 12 22C12 22 5 16.52 5 11V5L12 2Z" fill="#22c55e" stroke="#22c55e" strokeWidth="1.5"/>
+            <path d="M9.5 12.5L11.5 14.5L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </span>
+      )}
       <div className="p-4">
         <div className="flex items-start gap-4 mb-3">
           <Avatar className="w-12 h-12 border-2 border-transparent group-hover:border-primary transition-colors">
@@ -98,6 +142,13 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
             </div>
             <p className="text-muted-foreground text-xs mt-1">{worker.tags.join(', ')}</p>
           </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); setReportModalOpen(true); }}
+            className="text-muted-foreground hover:text-red-500 transition-colors p-1"
+            title="Report this worker"
+          >
+            <Flag size={16} />
+          </button>
         </div>
         
         <div className="flex items-center justify-between mt-4">
@@ -121,6 +172,36 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
           </Button>
         </div>
       </div>
+
+      {/* Report Modal */}
+      <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report {worker.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block mb-1 font-medium">Reason</label>
+              <Select value={reportReason} onValueChange={setReportReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inappropriate_behavior">Inappropriate Behavior</SelectItem>
+                  <SelectItem value="poor_service">Poor Service Quality</SelectItem>
+                  <SelectItem value="fake_profile">Fake Profile</SelectItem>
+                  <SelectItem value="spam">Spam or Scam</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleReport} disabled={submittingReport}>{submittingReport ? 'Submitting...' : 'Submit Report'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

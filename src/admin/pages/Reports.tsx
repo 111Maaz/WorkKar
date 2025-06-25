@@ -91,7 +91,7 @@ export default function Reports() {
         <select
           value={status}
           onChange={e => { setStatus(e.target.value); setPage(1); }}
-          className="border rounded px-2 py-1 max-w-xs"
+          className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-base text-gray-800 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
         >
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>

@@ -1,12 +1,16 @@
 import React from 'react';
 import { Home, Search, FileText, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface BottomNavigationProps {
   onSearchClick?: () => void;
 }
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ onSearchClick }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const currentPath = window.location.pathname;
 
   const navItems = [
@@ -14,6 +18,14 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ onSearchClick }) =>
     { id: 'search', label: 'Search', icon: Search, path: '#', action: onSearchClick },
     { id: 'profile', label: 'Profile', icon: User, path: '/profile' },
   ];
+
+  const handleSearchClick = () => {
+    if (location.pathname !== '/') {
+      navigate('/?focusSearch=1');
+    } else if (onSearchClick) {
+      onSearchClick();
+    }
+  };
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
@@ -25,7 +37,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ onSearchClick }) =>
           const element = item.action ? (
             <button
               key={item.id}
-              onClick={item.action}
+              onClick={handleSearchClick}
               className="flex flex-col items-center justify-center flex-1 h-full transition-colors text-gray-500 hover:text-gray-700"
             >
               <Icon size={20} />
