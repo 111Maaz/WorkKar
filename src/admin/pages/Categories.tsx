@@ -5,12 +5,13 @@ import { Input } from '@/components/UI/input';
 
 interface Category {
   id: number;
+  category_id: string;
   category_name: string;
   is_active: boolean;
 }
 interface Subcategory {
   id: number;
-  category_id: number;
+  category_id: string;
   subcategory_name: string;
   is_active: boolean;
 }
@@ -50,9 +51,10 @@ export default function Categories() {
   const handleSave = async () => {
     if (editType === 'category') {
       if (editItem) {
-        await supabase.from('service_categories').update({ category_name: form.category_name }).eq('id', editItem.id);
+        // Assuming category_id is also editable or pre-filled if needed
+        await supabase.from('service_categories').update({ category_name: form.category_name, category_id: form.category_id }).eq('id', editItem.id);
       } else {
-        await supabase.from('service_categories').insert({ category_name: form.category_name, is_active: true });
+        await supabase.from('service_categories').insert({ category_name: form.category_name, category_id: form.category_id, is_active: true });
       }
     } else {
       if (editItem) {
@@ -144,7 +146,7 @@ export default function Categories() {
                 {subcategories.map(sub => (
                   <tr key={sub.id} className="hover:bg-muted">
                     <td className="px-4 py-2">{sub.subcategory_name}</td>
-                    <td className="px-4 py-2">{categories.find(c => c.id === sub.category_id)?.category_name || 'Unknown'}</td>
+                    <td className="px-4 py-2">{categories.find(c => c.category_id === sub.category_id)?.category_name || 'Unknown'}</td>
                     <td className="px-4 py-2">
                       <button
                         className={`px-2 py-1 rounded ${sub.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
@@ -172,11 +174,18 @@ export default function Categories() {
             <h2 className="text-xl font-bold mb-4">{editItem ? 'Edit' : 'Add'} {editType === 'category' ? 'Category' : 'Subcategory'}</h2>
             <div className="space-y-4">
               {editType === 'category' ? (
-                <Input
-                  placeholder="Category Name"
-                  value={form.category_name || ''}
-                  onChange={e => setForm((f: any) => ({ ...f, category_name: e.target.value }))}
-                />
+                <>
+                  <Input
+                    placeholder="Category Name (e.g., Plumbing)"
+                    value={form.category_name || ''}
+                    onChange={e => setForm((f: any) => ({ ...f, category_name: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Category ID (e.g., plumbing)"
+                    value={form.category_id || ''}
+                    onChange={e => setForm((f: any) => ({ ...f, category_id: e.target.value }))}
+                  />
+                </>
               ) : (
                 <>
                   <Input
@@ -186,12 +195,12 @@ export default function Categories() {
                   />
                   <select
                     value={form.category_id || ''}
-                    onChange={e => setForm((f: any) => ({ ...f, category_id: Number(e.target.value) }))}
+                    onChange={e => setForm((f: any) => ({ ...f, category_id: e.target.value }))}
                     className="border rounded px-2 py-1 w-full"
                   >
                     <option value="">Select Category</option>
                     {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.category_name}</option>
+                      <option key={cat.id} value={cat.category_id}>{cat.category_name}</option>
                     ))}
                   </select>
                 </>

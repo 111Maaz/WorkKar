@@ -39,7 +39,7 @@ interface WorkerProfile {
   mobile_number: string;
   business_name: string | null;
   service_category: string;
-  service_subcategory: string;
+  service_subcategories: string[];
   location_address: string | null;
   location_coordinates: any;
   email_verified: boolean;
@@ -128,6 +128,9 @@ const Profile: React.FC = () => {
   const [globalChangeValue, setGlobalChangeValue] = useState('');
   const [globalChangeReason, setGlobalChangeReason] = useState('');
   const [submittingGlobalChange, setSubmittingGlobalChange] = useState(false);
+  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
+  const [subcategories, setSubcategories] = useState<{ id: string, name: string, category_id: string }[]>([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState<{ name: string }[]>([]);
 
   const workerFields = [
     { value: 'full_name', label: 'Full Name' },
@@ -135,11 +138,23 @@ const Profile: React.FC = () => {
     { value: 'mobile_number', label: 'Mobile Number' },
     { value: 'business_name', label: 'Business Name' },
     { value: 'service_category', label: 'Service Category' },
-    { value: 'service_subcategory', label: 'Service Subcategory' },
+    { value: 'service_subcategories', label: 'Service Subcategories' },
     { value: 'location_address', label: 'Location Address' },
   ];
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      const { data: catData, error: catError } = await supabase.from('service_categories').select('id, name');
+      if (catError) console.error('Error fetching categories', catError);
+      else setCategories(catData);
+
+      const { data: subcatData, error: subcatError } = await supabase.from('service_subcategories').select('id, name, category_id');
+      if (subcatError) console.error('Error fetching subcategories', subcatError);
+      else setSubcategories(subcatData);
+    };
+
+    fetchCategories();
+
     const fetchProfile = async () => {
       if (!user) {
         setLoading(false);
@@ -192,6 +207,18 @@ const Profile: React.FC = () => {
 
     fetchProfile();
   }, [user, toast]);
+
+  // Effect to filter subcategories when the main category changes
+  useEffect(() => {
+    if (globalChangeField === 'service_subcategories' && profile && 'service_category' in profile) {
+      const currentCategoryName = (profile as WorkerProfile).service_category;
+      const currentCategory = categories.find(c => c.name === currentCategoryName);
+      if (currentCategory) {
+        const filtered = subcategories.filter(sc => sc.category_id === currentCategory.id);
+        setFilteredSubcategories(filtered.map(sc => ({ name: sc.name })));
+      }
+    }
+  }, [globalChangeField, profile, categories, subcategories]);
 
   const handleSave = async () => {
     if (!user || !profile) return;
@@ -395,8 +422,17 @@ const Profile: React.FC = () => {
           <ProfileField icon={<Building size={18} />} label="Business Name" value={(profile as WorkerProfile).business_name} isEditing={isEditing}>
             <Input value={editForm.business_name || ''} onChange={(e) => setEditForm({ ...editForm, business_name: e.target.value })} />
           </ProfileField>
-          <ProfileField icon={<Briefcase size={18} />} label="Service" value={`${(profile as WorkerProfile).service_category} - ${(profile as WorkerProfile).service_subcategory}`}>
-            <Button size="sm" variant="outline" onClick={() => openChangeModal('service_category', `${(profile as WorkerProfile).service_category} - ${(profile as WorkerProfile).service_subcategory}`)}>Request Change</Button>
+          <ProfileField 
+            icon={<Briefcase size={18} />} 
+            label="Service" 
+            value={
+              <div>
+                <p className="font-semibold">{(profile as WorkerProfile).service_category}</p>
+                <p className="text-sm text-muted-foreground">{ (profile as WorkerProfile).service_subcategories?.join(', ') || 'No specializations'}</p>
+              </div>
+            }
+          >
+            <p className="text-sm text-muted-foreground">Use the "Request Admin Change" button to update your services.</p>
           </ProfileField>
           <ProfileField icon={<Star size={18} />} label="Rating" value={
             <div className="flex items-center gap-2">
@@ -536,7 +572,7 @@ const Profile: React.FC = () => {
           <div className="space-y-3">
             <div>
               <label className="block mb-1 font-medium">Field to Change</label>
-              <Select value={globalChangeField} onValueChange={setGlobalChangeField}>
+              <Select value={globalChangeField} onValueChange={field => { setGlobalChangeField(field); setGlobalChangeValue(''); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select field" />
                 </SelectTrigger>
@@ -547,10 +583,38 @@ const Profile: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <label className="block mb-1 font-medium">New Value</label>
-              <Input value={globalChangeValue} onChange={e => setGlobalChangeValue(e.target.value)} placeholder="Enter new value" />
-            </div>
+
+            {globalChangeField === 'service_category' ? (
+              <div>
+                <label className="block mb-1 font-medium">New Category</label>
+                <Select value={globalChangeValue} onValueChange={setGlobalChangeValue}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select new category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : globalChangeField === 'service_subcategories' ? (
+              <div>
+                <label className="block mb-1 font-medium">New Subcategories</label>
+                <Select value={globalChangeValue} onValueChange={setGlobalChangeValue}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select new subcategories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredSubcategories.map(sc => <SelectItem key={sc.name} value={sc.name}>{sc.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <label className="block mb-1 font-medium">New Value</label>
+                <Input value={globalChangeValue} onChange={e => setGlobalChangeValue(e.target.value)} placeholder="Enter new value" />
+              </div>
+            )}
+            
             <div>
               <label className="block mb-1 font-medium">Reason (optional)</label>
               <Textarea value={globalChangeReason} onChange={e => setGlobalChangeReason(e.target.value)} placeholder="Why do you want this change?" rows={3} />

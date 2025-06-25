@@ -114,15 +114,25 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
       )}
       onClick={handleCardClick}
     >
-      {/* Verified Shield Icon */}
-      {worker.verification_status === 'approved' && (
-        <span className="absolute top-3 right-3 z-10 bg-white/90 rounded-full shadow-lg p-1 flex items-center justify-center" title="Verified Worker">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L19 5V11C19 16.52 12 22 12 22C12 22 5 16.52 5 11V5L12 2Z" fill="#22c55e" stroke="#22c55e" strokeWidth="1.5"/>
-            <path d="M9.5 12.5L11.5 14.5L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </span>
-      )}
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        {/* Verified Shield Icon */}
+        {worker.verification_status === 'approved' && (
+          <span className="bg-white/90 rounded-full shadow-lg p-1 flex items-center justify-center" title="Verified Worker">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L19 5V11C19 16.52 12 22 12 22C12 22 5 16.52 5 11V5L12 2Z" fill="#22c55e" stroke="#22c55e" strokeWidth="1.5"/>
+              <path d="M9.5 12.5L11.5 14.5L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+        )}
+        {/* Report Button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); setReportModalOpen(true); }}
+          className="text-muted-foreground bg-white/90 rounded-full shadow-lg p-2 hover:text-red-500 transition-colors"
+          title="Report this worker"
+        >
+          <Flag size={16} />
+        </button>
+      </div>
       <div className="p-4">
         <div className="flex items-start gap-4 mb-3">
           <Avatar className="w-12 h-12 border-2 border-transparent group-hover:border-primary transition-colors">
@@ -143,13 +153,6 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
             </div>
             <p className="text-muted-foreground text-xs mt-1">{worker.tags.join(', ')}</p>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); setReportModalOpen(true); }}
-            className="text-muted-foreground hover:text-red-500 transition-colors p-1"
-            title="Report this worker"
-          >
-            <Flag size={16} />
-          </button>
         </div>
         
         <div className="flex items-center justify-between mt-4">

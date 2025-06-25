@@ -70,6 +70,7 @@ const Index = () => {
 
           return {
             id: worker.id.toString(),
+            user_id: worker.user_id,
             name: worker.full_name,
             avatar: '/placeholder.svg',
             profession: worker.service_category,
@@ -80,7 +81,7 @@ const Index = () => {
             location: { latitude: latitude || 0, longitude: longitude || 0 },
             location_address: worker.location_address,
             distance: distance,
-            tags: [worker.service_subcategory],
+            tags: worker.service_subcategories || [],
             bio: '', availability: true,
             joined: new Date(worker.created_at).toLocaleDateString(),
             mobile: worker.mobile_number,

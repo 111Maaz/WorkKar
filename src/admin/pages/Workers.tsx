@@ -11,7 +11,7 @@ interface Worker {
   mobile_number: string;
   business_name: string;
   service_category: string;
-  service_subcategory: string;
+  service_subcategories: string[];
   verification_status: string;
   is_active: boolean;
   created_at: string;
@@ -35,7 +35,7 @@ export default function Workers() {
     setLoading(true);
     let query = supabase
       .from('workers')
-      .select('id, user_id, full_name, email, mobile_number, business_name, service_category, service_subcategory, verification_status, is_active, created_at', { count: 'exact' })
+      .select('id, user_id, full_name, email, mobile_number, business_name, service_category, service_subcategories, verification_status, is_active, created_at', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
     if (search) {
@@ -117,6 +117,7 @@ export default function Workers() {
               <th className="px-4 py-2 text-left">Phone</th>
               <th className="px-4 py-2 text-left">Business</th>
               <th className="px-4 py-2 text-left">Category</th>
+              <th className="px-4 py-2 text-left">Subcategories</th>
               <th className="px-4 py-2 text-left">Status</th>
               <th className="px-4 py-2 text-left">Active</th>
               <th className="px-4 py-2 text-left">Actions</th>
@@ -124,9 +125,9 @@ export default function Workers() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} className="p-4 text-center">Loading...</td></tr>
+              <tr><td colSpan={9} className="p-4 text-center">Loading...</td></tr>
             ) : workers.length === 0 ? (
-              <tr><td colSpan={8} className="p-4 text-center text-muted-foreground">No workers found.</td></tr>
+              <tr><td colSpan={9} className="p-4 text-center text-muted-foreground">No workers found.</td></tr>
             ) : workers.map(worker => (
               <tr key={worker.id} className="hover:bg-muted cursor-pointer">
                 <td className="px-4 py-2" onClick={() => setSelectedWorker(worker)}>{worker.full_name}</td>
@@ -134,6 +135,7 @@ export default function Workers() {
                 <td className="px-4 py-2" onClick={() => setSelectedWorker(worker)}>{worker.mobile_number}</td>
                 <td className="px-4 py-2" onClick={() => setSelectedWorker(worker)}>{worker.business_name}</td>
                 <td className="px-4 py-2" onClick={() => setSelectedWorker(worker)}>{worker.service_category}</td>
+                <td className="px-4 py-2" onClick={() => setSelectedWorker(worker)}>{worker.service_subcategories?.join(', ')}</td>
                 <td className="px-4 py-2">
                   <span className={`px-2 py-1 rounded text-xs ${worker.verification_status === 'approved' ? 'bg-green-100 text-green-700' : worker.verification_status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>{worker.verification_status}</span>
                 </td>
@@ -176,7 +178,7 @@ export default function Workers() {
               <div><span className="font-medium">Phone:</span> {selectedWorker.mobile_number}</div>
               <div><span className="font-medium">Business:</span> {selectedWorker.business_name}</div>
               <div><span className="font-medium">Category:</span> {selectedWorker.service_category}</div>
-              <div><span className="font-medium">Subcategory:</span> {selectedWorker.service_subcategory}</div>
+              <div><span className="font-medium">Subcategories:</span> {selectedWorker.service_subcategories?.join(', ')}</div>
               <div><span className="font-medium">Status:</span> {selectedWorker.verification_status}</div>
               <div><span className="font-medium">Active:</span> {selectedWorker.is_active ? 'Yes' : 'No'}</div>
               <div><span className="font-medium">Created At:</span> {new Date(selectedWorker.created_at).toLocaleString()}</div>
@@ -210,8 +212,8 @@ export default function Workers() {
               <Input value={editForm.business_name || ''} onChange={e => setEditForm(f => ({ ...f, business_name: e.target.value }))} className="mb-2" />
               <label className="block text-sm font-medium mb-1">Category</label>
               <Input value={editForm.service_category || ''} onChange={e => setEditForm(f => ({ ...f, service_category: e.target.value }))} className="mb-2" />
-              <label className="block text-sm font-medium mb-1">Subcategory</label>
-              <Input value={editForm.service_subcategory || ''} onChange={e => setEditForm(f => ({ ...f, service_subcategory: e.target.value }))} className="mb-2" />
+              <label className="block text-sm font-medium mb-1">Subcategories (comma-separated)</label>
+              <Input value={editForm.service_subcategories?.join(', ') || ''} onChange={e => setEditForm(f => ({ ...f, service_subcategories: e.target.value.split(',').map(s => s.trim()) }))} className="mb-2" />
             </div>
             <div className="flex gap-2 mt-6">
               <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>

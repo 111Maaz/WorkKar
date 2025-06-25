@@ -248,7 +248,8 @@ const WorkerProfilePage = () => {
                       </button>
                     )}
                   </h1>
-                  <p className="text-lg text-primary font-medium">{worker.service_category} - {worker.service_subcategory}</p>
+                  <p className="text-lg text-primary font-medium">{worker.service_category}</p>
+                  <p className="text-sm text-muted-foreground">{worker.service_subcategories?.join(', ')}</p>
                 </div>
                 <div className="flex items-center gap-2">
                     <RatingStars rating={averageRating} size={20} />

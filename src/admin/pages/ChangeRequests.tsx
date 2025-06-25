@@ -67,25 +67,47 @@ export default function ChangeRequests() {
 
   const handleApprove = async (req: ChangeRequest) => {
     try {
-      // Update user profile
-      await supabase
-        .from('profiles')
+      // 1. Determine if the user is a worker or a general user
+      const { data: workerData } = await supabase
+        .from('workers')
+        .select('id')
+        .eq('user_id', req.user_id)
+        .single();
+
+      const isWorker = !!workerData;
+      const targetTable = isWorker ? 'workers' : 'profiles';
+      const idColumn = isWorker ? 'user_id' : 'id';
+
+      // 2. Handle special cases like email change
+      if (req.field === 'email') {
+        const { error: authError } = await supabase.auth.admin.updateUserById(
+          req.user_id,
+          { email: req.requested_value }
+        );
+        if (authError) throw new Error(`Failed to update auth email: ${authError.message}`);
+      }
+
+      // 3. Update the appropriate table
+      const { error: updateError } = await supabase
+        .from(targetTable)
         .update({ [req.field]: req.requested_value })
-        .eq('id', req.user_id);
+        .eq(idColumn, req.user_id);
+
+      if (updateError) throw updateError;
       
-      // Mark request as approved
+      // 4. Mark request as approved
       await supabase
         .from('change_requests')
         .update({ 
           status: 'approved', 
-          admin_response: 'Approved and updated.' 
+          admin_response: 'Approved and profile updated.' 
         })
         .eq('id', req.id);
       
-      toast({ title: 'Request approved', description: 'Profile updated successfully.' });
-      fetchRequests();
+      toast({ title: 'Request Approved', description: `The ${req.field} has been updated successfully.` });
+      fetchRequests(); // Refresh the list
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Approval Failed', description: error.message, variant: 'destructive' });
     }
   };
 
