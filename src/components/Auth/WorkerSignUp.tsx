@@ -189,13 +189,22 @@ const WorkerSignUp: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.location || !formData.location.address || !formData.location.coordinates) {
+      setErrors(new z.ZodError([{
+        path: ["location"],
+        message: "Location (address and coordinates) is required",
+        code: z.ZodIssueCode.custom
+      }]));
+      toast({
+        title: "Missing Information",
+        description: "Please select your location on the map or use your current location.",
+        variant: "destructive"
+      });
+      return;
+    }
     const validationResult = formSchema.safeParse(formData);
-    if (!validationResult.success || !formData.location) {
-        setErrors(validationResult.success === false ? validationResult.error : new z.ZodError([{
-            path: ["location"],
-            message: "Location is required",
-            code: z.ZodIssueCode.custom
-        }]));
+    if (!validationResult.success) {
+      setErrors(validationResult.error);
       toast({
         title: "Missing Information",
         description: "Please correct the errors below.",

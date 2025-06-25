@@ -228,6 +228,16 @@ const Profile: React.FC = () => {
   const handleSave = async () => {
     if (!user || !profile) return;
 
+    // Validate location before saving
+    if (!editForm.location_address || !editForm.location_coordinates) {
+      toast({
+        title: "Location Required",
+        description: "Please select your location on the map or use your current location.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       let error;
       const wkt = toWKT(editForm.location_coordinates);
@@ -266,6 +276,8 @@ const Profile: React.FC = () => {
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
       });
+      // Notify other tabs/pages to refresh user location
+      window.dispatchEvent(new Event('locationUpdated'));
     } catch (error: any) {
       toast({
         title: "Update Failed",
@@ -521,69 +533,42 @@ const Profile: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen w-full">
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          <div className="lg:col-span-1">
-            <Card className="overflow-hidden shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
-              <CardHeader className="items-center text-center p-6 bg-gradient-to-r from-blue-500 to-pink-500 text-white">
-                <img
-                  src={`https://api.dicebear.com/8.x/initials/svg?seed=${profile.full_name || 'User'}`}
-                  alt="Profile Avatar"
-                  className="h-24 w-24 rounded-full border-4 border-background shadow-lg mx-auto"
-                />
-                <CardTitle className="mt-4 text-xl font-extrabold drop-shadow-lg">{profile.full_name || 'User'}</CardTitle>
-                <CardDescription className="flex items-center gap-2 mt-1 text-white/90">
-                  <Mail size={14} /> {profile.email}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                {isWorker && (
-                  <div className="mb-4 flex justify-end">
-                    <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={() => setGlobalChangeModalOpen(true)}>
-                      Request Admin Change
-                    </Button>
-                  </div>
-                )}
-                {renderProfileDetails()}
-              </CardContent>
-              <CardFooter className="p-4 border-t">
-                  <Button 
-                    onClick={handleSignOut}
-                    variant="ghost"
-                    className="w-full text-destructive-foreground bg-destructive/90 hover:bg-destructive font-bold rounded-lg transition-all duration-200"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
+      <div className="container mx-auto px-4 py-12 flex justify-center">
+        <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
+          <Card className="overflow-hidden shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+            <CardHeader className="items-center text-center p-6 bg-gradient-to-r from-blue-500 to-pink-500 text-white">
+              <img
+                src={`https://api.dicebear.com/8.x/initials/svg?seed=${profile.full_name || 'User'}`}
+                alt="Profile Avatar"
+                className="h-24 w-24 rounded-full border-4 border-background shadow-lg mx-auto"
+              />
+              <CardTitle className="mt-4 text-xl font-extrabold drop-shadow-lg">{profile.full_name || 'User'}</CardTitle>
+              <CardDescription className="flex items-center gap-2 mt-1 text-white/90">
+                <Mail size={14} /> {profile.email}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              {isWorker && (
+                <div className="mb-4 flex justify-end gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
+                  <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={() => setGlobalChangeModalOpen(true)}>
+                    Request Admin Change
                   </Button>
-              </CardFooter>
-            </Card>
-          </div>
-          
-          <div className="lg:col-span-2">
-            <Card className="shadow-sm">
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <CardTitle className="text-2xl">Profile Information</CardTitle>
-                        <CardDescription>View and edit your personal details.</CardDescription>
-                    </div>
-                    {isEditing ? (
-                        <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}><X className="h-4 w-4 mr-2" /> Cancel</Button>
-                            <Button size="sm" onClick={handleSave}><Save className="h-4 w-4 mr-2" /> Save</Button>
-                        </div>
-                    ) : (
-                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
-                    )}
                 </div>
-              </CardHeader>
-              <CardContent className="divide-y divide-border">
-                {renderProfileDetails()}
-              </CardContent>
-            </Card>
-          </div>
-
+              )}
+              {renderProfileDetails()}
+            </CardContent>
+            <CardFooter className="p-4 border-t">
+                <Button 
+                  onClick={handleSignOut}
+                  variant="ghost"
+                  className="w-full text-destructive-foreground bg-destructive/90 hover:bg-destructive font-bold rounded-lg transition-all duration-200"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+            </CardFooter>
+          </Card>
         </div>
       </div>
 

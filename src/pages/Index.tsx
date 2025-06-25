@@ -189,6 +189,15 @@ const Index = () => {
     }
   }, [location.search]);
 
+  // Listen for location updates from profile page
+  useEffect(() => {
+    const handleLocationUpdated = () => {
+      initializePage();
+    };
+    window.addEventListener('locationUpdated', handleLocationUpdated);
+    return () => window.removeEventListener('locationUpdated', handleLocationUpdated);
+  }, [initializePage]);
+
   // Handle search functionality
   const handleSearch = (query: string, location: string) => {
     const queryLower = query.trim().toLowerCase();

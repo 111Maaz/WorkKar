@@ -158,13 +158,19 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
         <div className="flex items-center justify-between mt-4">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin size={14} />
-            {worker.distance ? (
-              <span>{`${worker.distance.toFixed(1)} km away`}</span>
-            ) : (
+            {userLocation == null ? (
               <button onClick={handleKnowDistanceClick} className="text-primary hover:underline font-medium text-left">
-                {userLocation ? 'Calculating...' : 'Know the distance'}
+                Know the distance
               </button>
-            )}
+            ) : (worker.location && worker.location.latitude && worker.location.longitude ? (
+              typeof worker.distance === 'number' ? (
+                <span>{`${worker.distance.toFixed(1)} km away`}</span>
+              ) : (
+                <span>Location not available</span>
+              )
+            ) : (
+              <span>Location not available</span>
+            ))}
           </div>
           
           <Button 
