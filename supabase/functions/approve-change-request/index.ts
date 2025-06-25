@@ -4,7 +4,9 @@ import { corsHeaders } from '../_shared/cors.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', {
+      headers: { ...corsHeaders, 'Content-Type': 'text/plain' }
+    });
   }
 
   try {
