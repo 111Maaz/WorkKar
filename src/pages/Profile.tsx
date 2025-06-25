@@ -292,18 +292,16 @@ const Profile: React.FC = () => {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}`);
       const data = await response.json();
       const address = data.display_name || `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
-
       setEditForm(prev => ({
         ...prev,
-        // Correctly format for PostGIS geography type
-        location_coordinates: `POINT(${coords[1]} ${coords[0]})`,
+        location_coordinates: coords,
         location_address: address
       }));
     } catch (error) {
       console.error("Reverse geocoding failed:", error);
       setEditForm(prev => ({
         ...prev,
-        location_coordinates: `POINT(${coords[1]} ${coords[0]})`,
+        location_coordinates: coords,
         location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`
       }));
     }
@@ -330,14 +328,14 @@ const Profile: React.FC = () => {
           const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}`);
           const data = await response.json();
           const address = data.display_name || `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
-          setEditForm({ ...editForm, location_address: address, location_coordinates: toWKT(coords) });
+          setEditForm({ ...editForm, location_address: address, location_coordinates: coords });
           toast({
               title: "Location Found",
               description: "Your current location has been set.",
           });
         } catch (error) {
           console.error("Reverse geocoding failed:", error);
-          setEditForm({ ...editForm, location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`, location_coordinates: toWKT(coords) });
+          setEditForm({ ...editForm, location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`, location_coordinates: coords });
           toast({
               title: "Location Set",
               description: "Could not fetch address, but coordinates are set.",
