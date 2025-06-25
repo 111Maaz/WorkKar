@@ -35,7 +35,12 @@ const AdminLayout: React.FC = () => {
         </div>
         <nav className="flex flex-col gap-3">
           {navItems.map(item => (
-            <Link key={item.path} to={item.path} className="px-3 py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-100 hover:to-pink-100 dark:hover:from-gray-800 dark:hover:to-gray-900 hover:shadow-md hover:scale-[1.03] text-foreground">
+            <Link 
+              key={item.path} 
+              to={item.path} 
+              onClick={() => setSidebarOpen(false)}
+              className="px-3 py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-100 hover:to-pink-100 dark:hover:from-gray-800 dark:hover:to-gray-900 hover:shadow-md hover:scale-[1.03] text-foreground"
+            >
               {item.label}
             </Link>
           ))}
@@ -47,7 +52,7 @@ const AdminLayout: React.FC = () => {
       {/* Sidebar overlay for mobile */}
       {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />}
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen w-full ml-0 md:ml-64 transition-all duration-300">
+      <div className="flex-1 flex flex-col w-full">
         <header className="flex items-center justify-between p-4 border-b bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg shadow-md md:hidden">
           <button onClick={() => setSidebarOpen(true)} className="text-foreground"><Menu size={24} /></button>
           <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">Admin Panel</span>

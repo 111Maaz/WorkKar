@@ -109,15 +109,6 @@ export default function Dashboard() {
           </ul>
         </div>
       </div>
-      {/* Fixed action buttons for mobile */}
-      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 shadow-lg p-4 flex gap-4 justify-center md:hidden">
-        <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg hover:scale-105 transition-transform" onClick={() => window.location.href = '/admin/workers'}>
-          Review Pending Worker Verifications
-        </Button>
-        <Button variant="destructive" className="bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-lg hover:scale-105 transition-transform" onClick={() => window.location.href = '/admin/reports'}>
-          Review Open Reports
-        </Button>
-      </div>
       {/* ...existing desktop buttons (md:flex)... */}
     </div>
   );
