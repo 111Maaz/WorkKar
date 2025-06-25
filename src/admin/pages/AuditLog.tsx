@@ -70,27 +70,27 @@ export default function AuditLog() {
           placeholder="Search action, table, or record..."
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
-          className="max-w-xs"
+          className="max-w-xs bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-base text-gray-800 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
         />
         <Input
           placeholder="Filter by admin name..."
           value={adminName}
           onChange={e => { setAdminName(e.target.value); setPage(1); }}
-          className="max-w-xs"
+          className="max-w-xs bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-base text-gray-800 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
         />
         <Input
           placeholder="Filter by action type..."
           value={actionType}
           onChange={e => { setActionType(e.target.value); setPage(1); }}
-          className="max-w-xs"
+          className="max-w-xs bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-base text-gray-800 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
         />
         <div className="flex flex-col">
           <label className="text-xs mb-1">From</label>
-          <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }} className="border rounded px-2 py-1" />
+          <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }} className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-base text-gray-800 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-blue-300 transition" />
         </div>
         <div className="flex flex-col">
           <label className="text-xs mb-1">To</label>
-          <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }} className="border rounded px-2 py-1" />
+          <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }} className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-base text-gray-800 dark:text-gray-100 shadow focus:outline-none focus:ring-2 focus:ring-blue-300 transition" />
         </div>
       </div>
       <div className="overflow-x-auto bg-card rounded shadow">

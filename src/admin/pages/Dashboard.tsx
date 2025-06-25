@@ -54,7 +54,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-32">
       <h1 className="text-3xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500 animate-gradient">Admin Dashboard</h1>
       {loading ? (
         <div className="animate-pulse text-lg text-muted-foreground">Loading metrics...</div>
@@ -109,7 +109,8 @@ export default function Dashboard() {
           </ul>
         </div>
       </div>
-      <div className="flex gap-4 mt-8">
+      {/* Fixed action buttons for mobile */}
+      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 shadow-lg p-4 flex gap-4 justify-center md:hidden">
         <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white shadow-lg hover:scale-105 transition-transform" onClick={() => window.location.href = '/admin/workers'}>
           Review Pending Worker Verifications
         </Button>
@@ -117,6 +118,7 @@ export default function Dashboard() {
           Review Open Reports
         </Button>
       </div>
+      {/* ...existing desktop buttons (md:flex)... */}
     </div>
   );
 } 

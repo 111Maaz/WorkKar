@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import BottomNavigation from '@/components/Layout/BottomNavigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
 import { Textarea } from '@/components/UI/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
 
 const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
@@ -122,6 +123,21 @@ const Profile: React.FC = () => {
   const [changeValue, setChangeValue] = useState('');
   const [changeReason, setChangeReason] = useState('');
   const [submittingChange, setSubmittingChange] = useState(false);
+  const [globalChangeModalOpen, setGlobalChangeModalOpen] = useState(false);
+  const [globalChangeField, setGlobalChangeField] = useState('');
+  const [globalChangeValue, setGlobalChangeValue] = useState('');
+  const [globalChangeReason, setGlobalChangeReason] = useState('');
+  const [submittingGlobalChange, setSubmittingGlobalChange] = useState(false);
+
+  const workerFields = [
+    { value: 'full_name', label: 'Full Name' },
+    { value: 'email', label: 'Email' },
+    { value: 'mobile_number', label: 'Mobile Number' },
+    { value: 'business_name', label: 'Business Name' },
+    { value: 'service_category', label: 'Service Category' },
+    { value: 'service_subcategory', label: 'Service Subcategory' },
+    { value: 'location_address', label: 'Location Address' },
+  ];
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -298,6 +314,33 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleGlobalChangeRequest = async () => {
+    if (!user) return;
+    if (!globalChangeField || !globalChangeValue) {
+      toast({ title: 'Missing fields', description: 'Please fill all fields.', variant: 'destructive' });
+      return;
+    }
+    setSubmittingGlobalChange(true);
+    const { error } = await supabase.from('change_requests').insert({
+      user_id: user.id,
+      field: globalChangeField,
+      current_value: profile ? profile[globalChangeField] : '',
+      requested_value: globalChangeValue,
+      reason: globalChangeReason,
+      status: 'pending',
+    });
+    setSubmittingGlobalChange(false);
+    setGlobalChangeModalOpen(false);
+    setGlobalChangeField('');
+    setGlobalChangeValue('');
+    setGlobalChangeReason('');
+    if (error) {
+      toast({ title: 'Request failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Request submitted', description: 'Your change request has been sent to the admin.' });
+    }
+  };
+
   if (loading) {
     return <ProfilePageSkeleton />;
   }
@@ -367,18 +410,6 @@ const Profile: React.FC = () => {
           }/>
         </>
       )}
-      {user && user.id !== profile.id && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground flex items-center gap-2"><Shield size={16} /> Verification</span>
-          {profile.email_verified ? (
-            <Badge variant="outline" className="text-green-600 border-green-600/50">
-              <CheckCircle size={14} className="mr-1" /> Verified
-            </Badge>
-          ) : (
-            <Badge variant="destructive">Not Verified</Badge>
-          )}
-        </div>
-      )}
     </>
   );
 
@@ -401,6 +432,13 @@ const Profile: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
+                {isWorker && (
+                  <div className="mb-4 flex justify-end">
+                    <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={() => setGlobalChangeModalOpen(true)}>
+                      Request Admin Change
+                    </Button>
+                  </div>
+                )}
                 {renderProfileDetails()}
               </CardContent>
               <CardFooter className="p-4 border-t">
@@ -489,6 +527,42 @@ const Profile: React.FC = () => {
           <DialogFooter>
             <Button variant="outline" onClick={() => setChangeModalOpen(false)}>Cancel</Button>
             <Button onClick={handleChangeRequest} disabled={submittingChange}>{submittingChange ? 'Submitting...' : 'Submit Request'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Global Change Request Modal */}
+      <Dialog open={globalChangeModalOpen} onOpenChange={setGlobalChangeModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Admin Change</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block mb-1 font-medium">Field to Change</label>
+              <Select value={globalChangeField} onValueChange={setGlobalChangeField}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select field" />
+                </SelectTrigger>
+                <SelectContent>
+                  {workerFields.map(f => (
+                    <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">New Value</label>
+              <Input value={globalChangeValue} onChange={e => setGlobalChangeValue(e.target.value)} placeholder="Enter new value" />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">Reason (optional)</label>
+              <Textarea value={globalChangeReason} onChange={e => setGlobalChangeReason(e.target.value)} placeholder="Why do you want this change?" rows={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGlobalChangeModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleGlobalChangeRequest} disabled={submittingGlobalChange}>{submittingGlobalChange ? 'Submitting...' : 'Submit Request'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

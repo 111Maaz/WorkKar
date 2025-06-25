@@ -6,13 +6,15 @@ import RatingStars from '@/components/UI/RatingStars';
 import { Button } from '@/components/UI/button';
 import { Textarea } from '@/components/UI/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/UI/card';
-import { MapPin, Phone, Star, Briefcase, Mail, Building, Send, ChevronLeft } from 'lucide-react';
+import { MapPin, Phone, Star, Briefcase, Mail, Building, Send, ChevronLeft, Flag } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/UI/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { Skeleton } from '@/components/UI/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/Layout/BottomNavigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
 
 const WorkerProfileSkeleton = () => (
   <div className="container mx-auto p-4 md:p-8">
@@ -70,6 +72,10 @@ const WorkerProfilePage = () => {
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   const fetchWorkerData = async () => {
     if (!id) return;
@@ -148,6 +154,33 @@ const WorkerProfilePage = () => {
     }
   };
 
+  const handleReport = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'You must be signed in to report.', variant: 'destructive' });
+      return;
+    }
+    if (!reportReason) {
+      toast({ title: 'Missing reason', description: 'Please provide a reason for the report.', variant: 'destructive' });
+      return;
+    }
+    setSubmittingReport(true);
+    const { error } = await supabase.from('reports').insert({
+      reported_item_type: 'worker',
+      reported_item_id: worker.id,
+      reporter_id: user.id,
+      reason: reportReason,
+      status: 'pending',
+    });
+    setSubmittingReport(false);
+    setReportModalOpen(false);
+    setReportReason('');
+    if (error) {
+      toast({ title: 'Report failed', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Report submitted', description: 'Thank you for your feedback.' });
+    }
+  };
+
   if (isLoading) {
     return <WorkerProfileSkeleton />;
   }
@@ -193,6 +226,18 @@ const WorkerProfilePage = () => {
                           <path d="M9.5 12.5L11.5 14.5L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </span>
+                    )}
+                    {/* Report icon, only if user is not the worker */}
+                    {user && user.id !== worker.user_id && (
+                      <button
+                        onClick={() => setReportModalOpen(true)}
+                        className="absolute top-4 right-4 p-1 rounded-full bg-white/80 hover:bg-white shadow-md z-20"
+                        title="Report this worker"
+                        aria-label="Report this worker"
+                        style={{ color: '#EF4444' }}
+                      >
+                        <Flag size={18} />
+                      </button>
                     )}
                   </h1>
                   <p className="text-lg text-primary font-medium">{worker.service_category} - {worker.service_subcategory}</p>
@@ -321,6 +366,35 @@ const WorkerProfilePage = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
         <BottomNavigation />
       </div>
+      {/* Report Modal */}
+      <Dialog open={reportModalOpen} onOpenChange={setReportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Report {worker.full_name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="block mb-1 font-medium">Reason</label>
+              <Select value={reportReason} onValueChange={setReportReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inappropriate_behavior">Inappropriate Behavior</SelectItem>
+                  <SelectItem value="poor_service">Poor Service Quality</SelectItem>
+                  <SelectItem value="fake_profile">Fake Profile</SelectItem>
+                  <SelectItem value="spam">Spam or Scam</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleReport} disabled={submittingReport}>{submittingReport ? 'Submitting...' : 'Submit Report'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
