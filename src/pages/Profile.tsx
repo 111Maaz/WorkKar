@@ -291,53 +291,49 @@ const Profile: React.FC = () => {
   };
 
   const handleChangeRequest = async () => {
-    if (!user) return;
-    if (!changeField || !changeValue) {
-      toast({ title: 'Missing fields', description: 'Please fill all fields.', variant: 'destructive' });
-      return;
-    }
+    if (!user || !profile) return;
     setSubmittingChange(true);
     const { error } = await supabase.from('change_requests').insert({
       user_id: user.id,
       field: changeField,
-      current_value: profile ? profile[changeField] : '',
+      current_value: (profile as any)[changeField] || 'Not set',
       requested_value: changeValue,
       reason: changeReason,
       status: 'pending',
     });
     setSubmittingChange(false);
-    setChangeModalOpen(false);
     if (error) {
       toast({ title: 'Request failed', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Request submitted', description: 'Your change request has been sent to the admin.' });
+      toast({ title: 'Request Submitted', description: 'Your change request has been sent for review.' });
+      setChangeModalOpen(false);
     }
   };
 
   const handleGlobalChangeRequest = async () => {
-    if (!user) return;
-    if (!globalChangeField || !globalChangeValue) {
-      toast({ title: 'Missing fields', description: 'Please fill all fields.', variant: 'destructive' });
+    if (!user || !profile || !globalChangeField || !globalChangeValue) {
+      toast({ title: 'Missing Information', description: 'Please fill out all fields for the change request.', variant: 'destructive' });
       return;
     }
     setSubmittingGlobalChange(true);
     const { error } = await supabase.from('change_requests').insert({
       user_id: user.id,
       field: globalChangeField,
-      current_value: profile ? profile[globalChangeField] : '',
+      current_value: (profile as any)[globalChangeField] || 'Not set',
       requested_value: globalChangeValue,
       reason: globalChangeReason,
       status: 'pending',
     });
     setSubmittingGlobalChange(false);
-    setGlobalChangeModalOpen(false);
-    setGlobalChangeField('');
-    setGlobalChangeValue('');
-    setGlobalChangeReason('');
     if (error) {
-      toast({ title: 'Request failed', description: error.message, variant: 'destructive' });
+      console.error('Change request error:', error);
+      toast({ title: 'Request failed', description: `There was an issue submitting your request: ${error.message}`, variant: 'destructive' });
     } else {
-      toast({ title: 'Request submitted', description: 'Your change request has been sent to the admin.' });
+      toast({ title: 'Request Submitted', description: 'Your change request has been sent to the admins for review.' });
+      setGlobalChangeModalOpen(false);
+      setGlobalChangeField('');
+      setGlobalChangeValue('');
+      setGlobalChangeReason('');
     }
   };
 
