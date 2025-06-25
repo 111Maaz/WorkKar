@@ -548,14 +548,23 @@ const Profile: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              {isWorker && (
-                <div className="mb-4 flex justify-end gap-2">
+              <div className="mb-4 flex justify-end gap-2">
+                {isEditing ? (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditForm(profile); }}>
+                      <X className="h-4 w-4 mr-2" /> Cancel
+                    </Button>
+                    <Button variant="default" size="sm" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={handleSave} disabled={JSON.stringify(editForm) === JSON.stringify(profile)}>
+                      <Save className="h-4 w-4 mr-2" /> Save
+                    </Button>
+                  </>
+                ) : (
                   <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
-                  <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={() => setGlobalChangeModalOpen(true)}>
-                    Request Admin Change
-                  </Button>
-                </div>
-              )}
+                )}
+                <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={() => setGlobalChangeModalOpen(true)}>
+                  Request Admin Change
+                </Button>
+              </div>
               {renderProfileDetails()}
             </CardContent>
             <CardFooter className="p-4 border-t">
