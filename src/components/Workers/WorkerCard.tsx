@@ -42,6 +42,7 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
   const { toast } = useToast();
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [otherReason, setOtherReason] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
 
   const handleCall = (e: React.MouseEvent) => {
@@ -76,17 +77,23 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
       toast({ title: 'Missing reason', description: 'Please provide a reason for the report.', variant: 'destructive' });
       return;
     }
+    if (reportReason === 'other' && !otherReason.trim()) {
+      toast({ title: 'Missing description', description: 'Please describe the issue.', variant: 'destructive' });
+      return;
+    }
     setSubmittingReport(true);
     const { error } = await supabase.from('reports').insert({
       reported_item_type: 'worker',
-      reported_item_id: worker.id,
+      reported_item_id: worker.user_id,
       reporter_id: user.id,
       reason: reportReason,
+      description: reportReason === 'other' ? otherReason : null,
       status: 'pending',
     });
     setSubmittingReport(false);
     setReportModalOpen(false);
     setReportReason('');
+    setOtherReason('');
     if (error) {
       toast({ title: 'Report failed', description: error.message, variant: 'destructive' });
     } else {
@@ -189,6 +196,12 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
                 </SelectContent>
               </Select>
             </div>
+            {reportReason === 'other' && (
+              <div>
+                <label className="block mb-1 font-medium">Describe the issue</label>
+                <Textarea value={otherReason} onChange={e => setOtherReason(e.target.value)} placeholder="Please describe the issue..." rows={3} />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReportModalOpen(false)}>Cancel</Button>
