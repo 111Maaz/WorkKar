@@ -54,6 +54,12 @@ interface SubcategoryFromDB {
   category_id: string;
 }
 
+// Helper to convert [lat, lng] to WKT
+function toWKT(coords) {
+  if (!coords || !Array.isArray(coords) || coords.length !== 2) return null;
+  return `POINT(${coords[1]} ${coords[0]})`;
+}
+
 const WorkerSignUp: React.FC = () => {
   const { toast } = useToast();
   const { signUp } = useAuth();
@@ -210,7 +216,8 @@ const WorkerSignUp: React.FC = () => {
         category: validData.category,
         subcategories: validData.subcategories,
         businessName: validData.businessName,
-        location: validData.location,
+        location_address: validData.location.address,
+        location_coordinates: toWKT(validData.location.coordinates),
       });
 
       if (error) {

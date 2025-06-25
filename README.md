@@ -83,7 +83,7 @@ Follow these instructions to set up and run the project locally.
 
 > **Note:** The admin panel's "Approve" button for change requests will not work unless the edge function is deployed.
 
-> **Note:** The project's sign-up form inserts data directly into the database and does not use Supabase Auth. Make sure your Row Level Security (RLS) policies on the `workers` and `profiles` tables allow for public inserts if you have RLS enabled.
+    > **Note:** The project's sign-up form inserts data directly into the database and does not use Supabase Auth. Make sure your Row Level Security (RLS) policies on the `workers` and `profiles` tables allow for public inserts if you have RLS enabled.
 
 4.  **Run the development server:**
     ```sh

@@ -108,6 +108,11 @@ const ProfilePageSkeleton = () => (
   </div>
 );
 
+// Helper to convert [lat, lng] to WKT
+function toWKT(coords) {
+  if (!coords || !Array.isArray(coords) || coords.length !== 2) return null;
+  return `POINT(${coords[1]} ${coords[0]})`;
+}
 
 const Profile: React.FC = () => {
   const { toast } = useToast();
@@ -225,7 +230,7 @@ const Profile: React.FC = () => {
 
     try {
       let error;
-      
+      const wkt = toWKT(editForm.location_coordinates);
       if ('service_category' in profile) {
         // Worker profile
         const { error: updateError } = await supabase
@@ -235,7 +240,7 @@ const Profile: React.FC = () => {
             mobile_number: editForm.mobile_number,
             business_name: editForm.business_name,
             location_address: editForm.location_address,
-            location_coordinates: editForm.location_coordinates,
+            location_coordinates: wkt,
           })
           .eq('user_id', user.id);
         error = updateError;
@@ -247,7 +252,7 @@ const Profile: React.FC = () => {
             full_name: editForm.full_name,
             mobile_number: editForm.mobile_number,
             location_address: editForm.location_address,
-            location_coordinates: editForm.location_coordinates,
+            location_coordinates: wkt,
           })
           .eq('id', user.id);
         error = updateError;
@@ -309,21 +314,18 @@ const Profile: React.FC = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
-        
         try {
           const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}`);
           const data = await response.json();
           const address = data.display_name || `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
-          
-          setEditForm({ ...editForm, location_address: address, location_coordinates: coords });
-
+          setEditForm({ ...editForm, location_address: address, location_coordinates: toWKT(coords) });
           toast({
               title: "Location Found",
               description: "Your current location has been set.",
           });
         } catch (error) {
           console.error("Reverse geocoding failed:", error);
-           setEditForm({ ...editForm, location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`, location_coordinates: coords });
+          setEditForm({ ...editForm, location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`, location_coordinates: toWKT(coords) });
           toast({
               title: "Location Set",
               description: "Could not fetch address, but coordinates are set.",
