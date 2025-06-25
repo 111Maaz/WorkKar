@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/UI/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/UI/checkbox';
 

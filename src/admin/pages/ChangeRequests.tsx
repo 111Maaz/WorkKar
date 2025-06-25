@@ -44,11 +44,23 @@ export default function ChangeRequests() {
     
     // Fetch user details for each request
     const requestsWithDetails = await Promise.all((data || []).map(async (req: ChangeRequest) => {
-      const { data: userData } = await supabase
+      // Try fetching from profiles first
+      let { data: userData } = await supabase
         .from('profiles')
         .select('full_name, email')
         .eq('id', req.user_id)
         .single();
+      
+      // If not in profiles, try workers
+      if (!userData) {
+        let { data: workerData } = await supabase
+          .from('workers')
+          .select('full_name, email')
+          .eq('user_id', req.user_id)
+          .single();
+        userData = workerData;
+      }
+      
       return {
         ...req,
         user_name: userData?.full_name || 'Unknown User',
@@ -67,42 +79,13 @@ export default function ChangeRequests() {
 
   const handleApprove = async (req: ChangeRequest) => {
     try {
-      // 1. Determine if the user is a worker or a general user
-      const { data: workerData } = await supabase
-        .from('workers')
-        .select('id')
-        .eq('user_id', req.user_id)
-        .single();
+      // Invoke the new edge function to handle the approval
+      const { data, error } = await supabase.functions.invoke('approve-change-request', {
+        body: { requestId: req.id }
+      });
 
-      const isWorker = !!workerData;
-      const targetTable = isWorker ? 'workers' : 'profiles';
-      const idColumn = isWorker ? 'user_id' : 'id';
-
-      // 2. Handle special cases like email change
-      if (req.field === 'email') {
-        const { error: authError } = await supabase.auth.admin.updateUserById(
-          req.user_id,
-          { email: req.requested_value }
-        );
-        if (authError) throw new Error(`Failed to update auth email: ${authError.message}`);
-      }
-
-      // 3. Update the appropriate table
-      const { error: updateError } = await supabase
-        .from(targetTable)
-        .update({ [req.field]: req.requested_value })
-        .eq(idColumn, req.user_id);
-
-      if (updateError) throw updateError;
-      
-      // 4. Mark request as approved
-      await supabase
-        .from('change_requests')
-        .update({ 
-          status: 'approved', 
-          admin_response: 'Approved and profile updated.' 
-        })
-        .eq('id', req.id);
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
       
       toast({ title: 'Request Approved', description: `The ${req.field} has been updated successfully.` });
       fetchRequests(); // Refresh the list
