@@ -7,7 +7,7 @@ import { Badge } from '@/components/UI/badge';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit, X, Save, Building, Star, MessageSquare, ChevronLeft } from 'lucide-react';
+import { User, MapPin, Phone, Briefcase, Mail, LogOut, Shield, CheckCircle, Edit, X, Save, Building, Star, MessageSquare, ChevronLeft, LocateFixed } from 'lucide-react';
 import { Skeleton } from '@/components/UI/skeleton';
 import { useNavigate } from 'react-router-dom';
 import BottomNavigation from '@/components/Layout/BottomNavigation';
@@ -293,6 +293,61 @@ const Profile: React.FC = () => {
     setIsMapOpen(false);
   };
 
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation Error",
+        description: "Geolocation is not supported by your browser.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    toast({ title: "Fetching Location", description: "Please wait..." });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
+        
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}`);
+          const data = await response.json();
+          const address = data.display_name || `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
+          
+          setEditForm({ ...editForm, location_address: address, location_coordinates: coords });
+
+          toast({
+              title: "Location Found",
+              description: "Your current location has been set.",
+          });
+        } catch (error) {
+          console.error("Reverse geocoding failed:", error);
+           setEditForm({ ...editForm, location_address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`, location_coordinates: coords });
+          toast({
+              title: "Location Set",
+              description: "Could not fetch address, but coordinates are set.",
+              variant: "default"
+          })
+        } finally {
+            setLoading(false);
+        }
+      },
+      (error) => {
+        let message = 'Unable to get your location.';
+        if (error.code === error.PERMISSION_DENIED) {
+          message = 'Location permission denied. Please allow location access in your browser settings.';
+        }
+        toast({
+          title: "Geolocation Error",
+          description: message,
+          variant: "destructive"
+        });
+        setLoading(false);
+      }
+    );
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -412,9 +467,26 @@ const Profile: React.FC = () => {
             <p className="text-sm p-3 border rounded-md min-h-[40px]">
                 {editForm.location_address || <span className="text-muted-foreground">No address selected</span>}
             </p>
-            <Button variant="outline" onClick={() => setIsMapOpen(true)}>
-                {editForm.location_address ? "Change on Map" : "Pick on Map"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsMapOpen(true)}
+                className="flex-grow"
+              >
+                <MapPin size={16} className="mr-2" />
+                Change on Map
+              </Button>
+               <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleUseCurrentLocation}
+                aria-label="Use my current location"
+              >
+                <LocateFixed size={16} />
+              </Button>
+            </div>
         </div>
       </ProfileField>
       {isWorker && (

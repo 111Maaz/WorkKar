@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/UI/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { z } from 'zod';
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, X } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Building, X, LocateFixed } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/UI/checkbox';
 
@@ -118,6 +118,66 @@ const WorkerSignUp: React.FC = () => {
       }));
     }
     setIsMapOpen(false);
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation Error",
+        description: "Geolocation is not supported by your browser.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    toast({ title: "Fetching Location", description: "Please wait..." });
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const coords: [number, number] = [position.coords.latitude, position.coords.longitude];
+        
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords[0]}&lon=${coords[1]}`);
+          const data = await response.json();
+          const address = data.display_name || `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`;
+          
+          setFormData(prev => ({
+            ...prev,
+            location: { address, coordinates: coords }
+          }));
+          toast({
+              title: "Location Found",
+              description: "Your current location has been set.",
+          });
+        } catch (error) {
+          console.error("Reverse geocoding failed:", error);
+          setFormData(prev => ({
+            ...prev,
+            location: { address: `${coords[0].toFixed(4)}, ${coords[1].toFixed(4)}`, coordinates: coords }
+          }));
+          toast({
+              title: "Location Set",
+              description: "Could not fetch address, but coordinates are set.",
+              variant: "default"
+          })
+        } finally {
+            setIsSubmitting(false);
+        }
+      },
+      (error) => {
+        let message = 'Unable to get your location.';
+        if (error.code === error.PERMISSION_DENIED) {
+          message = 'Location permission denied. Please allow location access in your browser settings.';
+        }
+        toast({
+          title: "Geolocation Error",
+          description: message,
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+      }
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -397,12 +457,34 @@ const WorkerSignUp: React.FC = () => {
             Location *
           </Label>
           <div className="mt-1">
-            <Button variant="outline" type="button" onClick={() => setIsMapOpen(true)} className="w-full">
-              {formData.location ? "Change Location" : "Pick on Map"}
-            </Button>
-            {formData.location?.address && <p className="text-sm text-muted-foreground mt-2">{formData.location.address}</p>}
-            {getError('location') && <p className="text-sm text-red-500 mt-1">{getError('location')}</p>}
+            <div className="flex items-center gap-2">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => setIsMapOpen(true)}
+                className="flex-grow"
+                disabled={isSubmitting}
+              >
+                <MapPin size={16} className="mr-2" /> Pick on Map
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handleUseCurrentLocation}
+                disabled={isSubmitting}
+                aria-label="Use my current location"
+              >
+                <LocateFixed size={16} />
+              </Button>
+            </div>
+            {formData.location?.address && (
+              <p className="text-sm text-muted-foreground mt-2 truncate" title={formData.location.address}>
+                Selected: {formData.location.address}
+              </p>
+            )}
           </div>
+          {getError('location') && <p className="text-sm text-red-500 mt-1">{getError('location')}</p>}
         </div>
         
         <div className="pt-2">
