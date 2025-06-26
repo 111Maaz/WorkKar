@@ -133,19 +133,15 @@ const Profile: React.FC = () => {
   const [globalChangeValue, setGlobalChangeValue] = useState('');
   const [globalChangeReason, setGlobalChangeReason] = useState('');
   const [submittingGlobalChange, setSubmittingGlobalChange] = useState(false);
-  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
-  const [subcategories, setSubcategories] = useState<{ id: string, name: string, category_id: string }[]>([]);
-  const [filteredSubcategories, setFilteredSubcategories] = useState<{ name: string }[]>([]);
+  const [categories, setCategories] = useState<{ category_id: string, category_name: string }[]>([]);
+  const [subcategories, setSubcategories] = useState<{ subcategory_name: string, category_id: string }[]>([]);
+  const [filteredSubcategories, setFilteredSubcategories] = useState<{ subcategory_name: string }[]>([]);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   const workerFields = [
-    { value: 'full_name', label: 'Full Name' },
     { value: 'email', label: 'Email' },
-    { value: 'mobile_number', label: 'Mobile Number' },
-    { value: 'business_name', label: 'Business Name' },
     { value: 'service_category', label: 'Service Category' },
     { value: 'service_subcategories', label: 'Service Subcategories' },
-    { value: 'location_address', label: 'Location Address' },
   ];
 
   useEffect(() => {
@@ -161,11 +157,11 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const { data: catData, error: catError } = await supabase.from('service_categories').select('id, name');
+      const { data: catData, error: catError } = await supabase.from('service_categories').select('category_id, category_name');
       if (catError) console.error('Error fetching categories', catError);
       else setCategories(catData);
 
-      const { data: subcatData, error: subcatError } = await supabase.from('service_subcategories').select('id, name, category_id');
+      const { data: subcatData, error: subcatError } = await supabase.from('service_subcategories').select('subcategory_name, category_id');
       if (subcatError) console.error('Error fetching subcategories', subcatError);
       else setSubcategories(subcatData);
     };
@@ -241,10 +237,15 @@ const Profile: React.FC = () => {
   useEffect(() => {
     if (globalChangeField === 'service_subcategories' && profile && 'service_category' in profile) {
       const currentCategoryName = (profile as WorkerProfile).service_category;
-      const currentCategory = categories.find(c => c.name === currentCategoryName);
+      const currentCategory = categories.find(c => c.category_name.toLowerCase() === currentCategoryName.toLowerCase());
+      console.log('DEBUG: currentCategoryName', currentCategoryName);
+      console.log('DEBUG: categories', categories);
+      console.log('DEBUG: subcategories', subcategories);
+      console.log('DEBUG: currentCategory', currentCategory);
       if (currentCategory) {
-        const filtered = subcategories.filter(sc => sc.category_id === currentCategory.id);
-        setFilteredSubcategories(filtered.map(sc => ({ name: sc.name })));
+        const filteredSubcats = subcategories.filter(sc => sc.category_id === currentCategory.category_id);
+        console.log('DEBUG: filteredSubcats', filteredSubcats);
+        setFilteredSubcategories(filteredSubcats.map(sc => ({ subcategory_name: sc.subcategory_name })));
       }
     }
   }, [globalChangeField, profile, categories, subcategories]);
@@ -687,7 +688,7 @@ const Profile: React.FC = () => {
                     <SelectValue placeholder="Select new category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                    {categories.map(c => <SelectItem key={c.category_id} value={c.category_name}>{c.category_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -699,7 +700,7 @@ const Profile: React.FC = () => {
                     <SelectValue placeholder="Select new subcategories" />
                   </SelectTrigger>
                   <SelectContent>
-                    {filteredSubcategories.map(sc => <SelectItem key={sc.name} value={sc.name}>{sc.name}</SelectItem>)}
+                    {filteredSubcategories.map(sc => <SelectItem key={sc.subcategory_name} value={sc.subcategory_name}>{sc.subcategory_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
