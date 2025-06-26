@@ -136,6 +136,7 @@ const Profile: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   const [subcategories, setSubcategories] = useState<{ id: string, name: string, category_id: string }[]>([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState<{ name: string }[]>([]);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   const workerFields = [
     { value: 'full_name', label: 'Full Name' },
@@ -146,6 +147,17 @@ const Profile: React.FC = () => {
     { value: 'service_subcategories', label: 'Service Subcategories' },
     { value: 'location_address', label: 'Location Address' },
   ];
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -167,6 +179,16 @@ const Profile: React.FC = () => {
       }
 
       try {
+        if (!navigator.onLine) {
+          // Offline: load from localStorage
+          const cached = localStorage.getItem('profile');
+          if (cached) {
+            setProfile(JSON.parse(cached));
+            setEditForm(JSON.parse(cached));
+            setLoading(false);
+            return;
+          }
+        }
         // Try to fetch from profiles table first
         let { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -177,6 +199,7 @@ const Profile: React.FC = () => {
         if (profileData) {
           setProfile(profileData as UserProfile);
           setEditForm(profileData);
+          localStorage.setItem('profile', JSON.stringify(profileData));
         } else {
           // If not in profiles, try workers table
           let { data: workerData, error: workerError } = await supabase
@@ -190,6 +213,7 @@ const Profile: React.FC = () => {
             const workerWithType = { ...workerData, user_type: 'skilled_professional' as const };
             setProfile(workerWithType as WorkerProfile);
             setEditForm(workerWithType);
+            localStorage.setItem('profile', JSON.stringify(workerWithType));
           } else {
             toast({
               title: "Profile Not Found",
@@ -531,6 +555,11 @@ const Profile: React.FC = () => {
 
   return (
     <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen w-full">
+      {isOffline && (
+        <div className="bg-yellow-200 text-yellow-900 text-center py-2 font-semibold">
+          You are offline. Some features may be unavailable.
+        </div>
+      )}
       <div className="container mx-auto px-4 py-12 flex justify-center">
         <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
           <Card className="overflow-hidden shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">

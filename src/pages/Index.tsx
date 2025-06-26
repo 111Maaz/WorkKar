@@ -23,6 +23,7 @@ const Index = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number, longitude: number } | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   // Haversine formula for distance calculation
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -38,10 +39,33 @@ const Index = () => {
     return R * c;
   };
 
+  // Listen for online/offline events
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // 1. Fetch workers and calculate distances based on user's location
   const fetchAndProcessWorkers = useCallback(async (userLocation: { latitude: number, longitude: number } | null) => {
     setLoading(true);
     try {
+      if (!navigator.onLine) {
+        // Offline: load from localStorage
+        const cached = localStorage.getItem('workers');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          setWorkers(parsed);
+          setFilteredWorkers(parsed);
+          setLoading(false);
+          return;
+        }
+      }
       const { data, error } = await supabase
         .from('workers')
         .select('*')
@@ -101,6 +125,8 @@ const Index = () => {
 
       setWorkers(transformedWorkers);
       setFilteredWorkers(transformedWorkers);
+      // Cache to localStorage
+      localStorage.setItem('workers', JSON.stringify(transformedWorkers));
 
       const categoryMap = new Map<string, string>();
       transformedWorkers.forEach(worker => {
@@ -268,6 +294,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+      {isOffline && (
+        <div className="bg-yellow-200 text-yellow-900 text-center py-2 font-semibold">
+          You are offline. Some features may be unavailable.
+        </div>
+      )}
       <Navbar />
       <main className="flex-grow">
         <Hero onSearch={handleSearch} ref={heroRef} inputRef={searchInputRef} />
