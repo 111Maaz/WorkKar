@@ -104,3 +104,18 @@ The application should now be running on [http://localhost:5173](http://localhos
 ## 🧹 Codebase Cleanup
 
 The codebase has been cleaned to remove all mentions of placeholder names and has been standardized to use the "WorkKar" branding and iconography.
+
+## 📍 Location Handling
+
+When a user selects their location (either by pin-pointing on the map or using the "Use My Location" button):
+
+- The app fetches the **full, human-readable address** using the Nominatim API and saves it as the `location_address` (text) in the database.
+- The app saves the **coordinates** as a geometry value (WKT, e.g., `POINT(lng lat)`) in the `location_coordinates` (geometry) column.
+- This is required for distance calculation and for users to find nearby workers.
+- If either value is missing, the profile cannot be saved or updated.
+
+**Example:**
+- `location_address`: `Murad Nagar, Ward 70 Mehdipatnam, Greater Hyderabad Municipal Corporation Central Zone, Hyderabad, Asif Nagar mandal, Hyderabad, Telangana, 500264, India`
+- `location_coordinates`: `0101000020E61000000009005B649C5340157C7159BC633140`
+
+This logic applies to both profile updates and worker sign-up.
