@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
+import { useToast } from '@/hooks/use-toast';
 
 interface Category {
   id: number;
@@ -27,6 +28,7 @@ export default function Categories() {
   const [editItem, setEditItem] = useState<any>(null);
   const [form, setForm] = useState<any>({});
   const [confirmDelete, setConfirmDelete] = useState<{ type: EditType; id: number } | null>(null);
+  const { toast } = useToast();
 
   const fetchData = async () => {
     setLoading(true);
@@ -50,32 +52,65 @@ export default function Categories() {
 
   const handleSave = async () => {
     if (editType === 'category') {
+      if (!form.category_id || !form.category_name) {
+        toast({ title: 'Error', description: 'Both Category ID and Name are required.', variant: 'destructive' });
+        return;
+      }
+      let error;
       if (editItem) {
-        // Assuming category_id is also editable or pre-filled if needed
-        await supabase.from('service_categories').update({ category_name: form.category_name, category_id: form.category_id }).eq('id', editItem.id);
+        const { error: updateError } = await supabase.from('service_categories').update({ category_name: form.category_name, category_id: form.category_id }).eq('id', editItem.id);
+        error = updateError;
       } else {
-        await supabase.from('service_categories').insert({ category_name: form.category_name, category_id: form.category_id, is_active: true });
+        const { error: insertError } = await supabase.from('service_categories').insert({ category_name: form.category_name, category_id: form.category_id, is_active: true });
+        error = insertError;
+      }
+      if (error) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Success', description: 'Category saved.' });
+        closeModal();
+        await fetchData();
       }
     } else {
+      if (!form.subcategory_name || !form.category_id) {
+        toast({ title: 'Error', description: 'Both Subcategory Name and Category are required.', variant: 'destructive' });
+        return;
+      }
+      let error;
       if (editItem) {
-        await supabase.from('service_subcategories').update({ subcategory_name: form.subcategory_name, category_id: form.category_id }).eq('id', editItem.id);
+        const { error: updateError } = await supabase.from('service_subcategories').update({ subcategory_name: form.subcategory_name, category_id: form.category_id }).eq('id', editItem.id);
+        error = updateError;
       } else {
-        await supabase.from('service_subcategories').insert({ subcategory_name: form.subcategory_name, category_id: form.category_id, is_active: true });
+        const { error: insertError } = await supabase.from('service_subcategories').insert({ subcategory_name: form.subcategory_name, category_id: form.category_id, is_active: true });
+        error = insertError;
+      }
+      if (error) {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: 'Success', description: 'Subcategory saved.' });
+        closeModal();
+        await fetchData();
       }
     }
-    closeModal();
-    fetchData();
   };
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
+    let error;
     if (confirmDelete.type === 'category') {
-      await supabase.from('service_categories').delete().eq('id', confirmDelete.id);
+      const { error: delError } = await supabase.from('service_categories').delete().eq('id', confirmDelete.id);
+      error = delError;
     } else {
-      await supabase.from('service_subcategories').delete().eq('id', confirmDelete.id);
+      const { error: delError } = await supabase.from('service_subcategories').delete().eq('id', confirmDelete.id);
+      error = delError;
     }
-    setConfirmDelete(null);
-    fetchData();
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Success', description: 'Deleted successfully.' });
+      setConfirmDelete(null);
+      await fetchData();
+    }
   };
 
   const handleToggleActive = async (type: EditType, id: number, isActive: boolean) => {
