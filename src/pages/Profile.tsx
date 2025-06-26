@@ -237,7 +237,7 @@ const Profile: React.FC = () => {
   useEffect(() => {
     if (globalChangeField === 'service_subcategories' && profile && 'service_category' in profile) {
       const currentCategoryName = (profile as WorkerProfile).service_category;
-      const currentCategory = categories.find(c => c.category_name.toLowerCase() === currentCategoryName.toLowerCase());
+      const currentCategory = categories.find(c => c.category_id === (profile as WorkerProfile).service_category || c.category_name.toLowerCase() === currentCategoryName.toLowerCase());
       console.log('DEBUG: currentCategoryName', currentCategoryName);
       console.log('DEBUG: categories', categories);
       console.log('DEBUG: subcategories', subcategories);
@@ -688,7 +688,7 @@ const Profile: React.FC = () => {
                     <SelectValue placeholder="Select new category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(c => <SelectItem key={c.category_id} value={c.category_name}>{c.category_name}</SelectItem>)}
+                    {categories.map(c => <SelectItem key={c.category_id} value={c.category_id}>{c.category_name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

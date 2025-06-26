@@ -418,7 +418,7 @@ const WorkerSignUp: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map(cat => (
-                    <SelectItem key={cat.category_id} value={cat.category_name}>{cat.category_name}</SelectItem>
+                    <SelectItem key={cat.category_id} value={cat.category_id}>{cat.category_name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

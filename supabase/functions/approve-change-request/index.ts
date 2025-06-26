@@ -70,6 +70,18 @@ serve(async (req) => {
     
     const targetColumn = columnMapping[field] || field;
 
+    // If updating service_category, validate the value exists in service_categories
+    if (targetColumn === 'service_category') {
+      const { data: validCat } = await supabaseAdmin
+        .from('service_categories')
+        .select('category_id')
+        .eq('category_id', requested_value)
+        .single();
+      if (!validCat) {
+        throw new Error('Requested category_id does not exist in service_categories.');
+      }
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from(targetTable)
       .update({ [targetColumn]: requested_value })
@@ -95,7 +107,8 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Edge Function Error:', error);
+    return new Response(JSON.stringify({ error: error.message || String(error) }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
     });

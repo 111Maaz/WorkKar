@@ -30,6 +30,7 @@ export default function Workers() {
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Worker>>({});
+  const [categories, setCategories] = useState<{ category_id: string, category_name: string }[]>([]);
 
   const fetchWorkers = async () => {
     setLoading(true);
@@ -57,6 +58,14 @@ export default function Workers() {
     fetchWorkers();
     // eslint-disable-next-line
   }, [search, category, status, page]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from('service_categories').select('category_id, category_name').eq('is_active', true);
+      setCategories(data || []);
+    };
+    fetchCategories();
+  }, []);
 
   const handleToggleActive = async (worker: Worker) => {
     await supabase.from('workers').update({ is_active: !worker.is_active }).eq('id', worker.id);
@@ -211,7 +220,16 @@ export default function Workers() {
               <label className="block text-sm font-medium mb-1">Business</label>
               <Input value={editForm.business_name || ''} onChange={e => setEditForm(f => ({ ...f, business_name: e.target.value }))} className="mb-2" />
               <label className="block text-sm font-medium mb-1">Category</label>
-              <Input value={editForm.service_category || ''} onChange={e => setEditForm(f => ({ ...f, service_category: e.target.value }))} className="mb-2" />
+              <select
+                value={editForm.service_category || ''}
+                onChange={e => setEditForm(f => ({ ...f, service_category: e.target.value }))}
+                className="mb-2 border rounded px-2 py-1 w-full"
+              >
+                <option value="">Select Category</option>
+                {categories.map(cat => (
+                  <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
+                ))}
+              </select>
               <label className="block text-sm font-medium mb-1">Subcategories (comma-separated)</label>
               <Input value={editForm.service_subcategories?.join(', ') || ''} onChange={e => setEditForm(f => ({ ...f, service_subcategories: e.target.value.split(',').map(s => s.trim()) }))} className="mb-2" />
             </div>
