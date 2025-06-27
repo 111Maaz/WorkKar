@@ -554,6 +554,30 @@ const Profile: React.FC = () => {
               ))}
             </select>
             <label className="block text-sm font-medium">Subcategories</label>
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="checkbox"
+                id="select-all-subcategories"
+                checked={
+                  Array.isArray(editForm.service_subcategories) &&
+                  editForm.service_subcategories.length > 0 &&
+                  editForm.service_subcategories.length === subcategories.filter(sc => sc.category_id === editForm.service_category).length
+                }
+                onChange={e => {
+                  if (e.target.checked) {
+                    setEditForm(f => ({
+                      ...f,
+                      service_subcategories: subcategories
+                        .filter(sc => sc.category_id === editForm.service_category)
+                        .map(sc => sc.subcategory_name)
+                    }));
+                  } else {
+                    setEditForm(f => ({ ...f, service_subcategories: [] }));
+                  }
+                }}
+              />
+              <label htmlFor="select-all-subcategories" className="text-sm font-semibold cursor-pointer">Select All</label>
+            </div>
             <select
               multiple
               value={editForm.service_subcategories || []}
