@@ -274,6 +274,8 @@ const Profile: React.FC = () => {
             business_name: editForm.business_name,
             location_address: editForm.location_address,
             location_coordinates: wkt,
+            service_category: editForm.service_category,
+            service_subcategories: editForm.service_subcategories,
           })
           .eq('user_id', user.id);
         error = updateError;
