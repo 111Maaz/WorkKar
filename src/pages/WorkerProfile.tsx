@@ -261,78 +261,62 @@ const WorkerProfilePage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div className="md:col-span-2">
-            <Tabs defaultValue="about" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="about">About {worker.full_name.split(' ')[0]}</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
-              </TabsList>
-              <TabsContent value="about">
-                <Card className="mt-4">
-                  <CardHeader><CardTitle>Biography</CardTitle></CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">{worker.bio || 'No biography provided. This professional is focused on delivering quality work.'}</p>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="reviews">
-                <Card className="mt-4">
-                    <CardHeader>
-                        <CardTitle>Customer Feedback</CardTitle>
-                        <CardDescription>See what others are saying about {worker.full_name}.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {user && user.id !== worker.user_id && (
-                            <form onSubmit={handleReviewSubmit} className="p-4 border rounded-lg bg-background">
-                                <h3 className="text-lg font-semibold mb-3">Leave a Review</h3>
-                                <div className="flex items-center gap-1 mb-3">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star
-                                            key={star}
-                                            size={22}
-                                            className={`cursor-pointer transition-all duration-150 ${newRating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`}
-                                            onClick={() => setNewRating(star)}
-                                        />
-                                    ))}
-                                </div>
-                                <Textarea 
-                                    placeholder={`Share your experience...`}
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    className="mb-3"
-                                    required
-                                />
-                                <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Submitting...' : 'Submit Review'} <Send size={16} className="ml-2" />
-                                </Button>
-                            </form>
-                        )}
-                        {user && user.id === worker.user_id && <p className="text-sm text-center text-muted-foreground p-4">This is your public profile. You cannot review yourself.</p>}
-                        {!user && <p className="text-sm text-center text-muted-foreground p-4">Please <Link to="/auth" className="text-primary underline">sign in</Link> to leave a review.</p>}
+            <Card className="mt-4">
+                <CardHeader>
+                    <CardTitle>Customer Feedback</CardTitle>
+                    <CardDescription>See what others are saying about {worker.full_name}.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {user && user.id !== worker.user_id && (
+                        <form onSubmit={handleReviewSubmit} className="p-4 border rounded-lg bg-background">
+                            <h3 className="text-lg font-semibold mb-3">Leave a Review</h3>
+                            <div className="flex items-center gap-1 mb-3">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                        key={star}
+                                        size={22}
+                                        className={`cursor-pointer transition-all duration-150 ${newRating >= star ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-yellow-300'}`}
+                                        onClick={() => setNewRating(star)}
+                                    />
+                                ))}
+                            </div>
+                            <Textarea 
+                                placeholder={`Share your experience...`}
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                className="mb-3"
+                                required
+                            />
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? 'Submitting...' : 'Submit Review'} <Send size={16} className="ml-2" />
+                            </Button>
+                        </form>
+                    )}
+                    {user && user.id === worker.user_id && <p className="text-sm text-center text-muted-foreground p-4">This is your public profile. You cannot review yourself.</p>}
+                    {!user && <p className="text-sm text-center text-muted-foreground p-4">Please <Link to="/auth" className="text-primary underline">sign in</Link> to leave a review.</p>}
 
-                        <div className="space-y-6">
-                            {reviews.length > 0 ? reviews.map(review => (
-                                <div key={review.id} className="flex gap-4">
-                                    <Avatar>
-                                      <AvatarImage src={review.author?.avatar_url} alt={review.author?.full_name}/>
-                                      <AvatarFallback>{review.author?.full_name ? review.author.full_name.charAt(0) : 'A'}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1">
-                                      <div className="flex justify-between items-center">
-                                        <h4 className="font-semibold">{review.author?.full_name || 'Anonymous'}</h4>
-                                        <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString()}</span>
-                                      </div>
-                                      <RatingStars rating={review.rating} size={16} className="my-1"/>
-                                      <p className="text-sm text-muted-foreground">{review.comment}</p>
-                                    </div>
+                    <div className="space-y-6">
+                        {reviews.length > 0 ? reviews.map(review => (
+                            <div key={review.id} className="flex gap-4">
+                                <Avatar>
+                                  <AvatarImage src={review.author?.avatar_url} alt={review.author?.full_name}/>
+                                  <AvatarFallback>{review.author?.full_name ? review.author.full_name.charAt(0) : 'A'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex justify-between items-center">
+                                    <h4 className="font-semibold">{review.author?.full_name || 'Anonymous'}</h4>
+                                    <span className="text-xs text-muted-foreground">{new Date(review.created_at).toLocaleDateString()}</span>
+                                  </div>
+                                  <RatingStars rating={review.rating} size={16} className="my-1"/>
+                                  <p className="text-sm text-muted-foreground">{review.comment}</p>
                                 </div>
-                            )) : (
-                                <p className="text-center py-8 text-muted-foreground">No reviews yet. Be the first to leave one!</p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                            </div>
+                        )) : (
+                            <p className="text-center py-8 text-muted-foreground">No reviews yet. Be the first to leave one!</p>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
           </div>
           <div className="md:col-span-1 sticky top-8">
               <Card>
@@ -346,10 +330,7 @@ const WorkerProfilePage = () => {
                             <span>{worker.business_name}</span>
                         </div>
                       }
-                      <div className="flex items-center gap-3">
-                          <Mail size={16} className="text-muted-foreground" />
-                          <span>{worker.email}</span>
-                      </div>
+                      {/* Email removed for privacy */}
                       <div className="flex items-center gap-3">
                           <Phone size={16} className="text-muted-foreground" />
                           <span>{worker.mobile_number}</span>

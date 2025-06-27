@@ -140,8 +140,6 @@ const Profile: React.FC = () => {
 
   const workerFields = [
     { value: 'email', label: 'Email' },
-    { value: 'service_category', label: 'Service Category' },
-    { value: 'service_subcategories', label: 'Service Subcategories' },
   ];
 
   useEffect(() => {
@@ -536,12 +534,38 @@ const Profile: React.FC = () => {
             label="Service" 
             value={
               <div>
-                <p className="font-semibold">{(profile as WorkerProfile).service_category}</p>
-                <p className="text-sm text-muted-foreground">{ (profile as WorkerProfile).service_subcategories?.join(', ') || 'No specializations'}</p>
+                <p className="font-semibold">{categories.find(c => c.category_id === editForm.service_category)?.category_name || editForm.service_category}</p>
+                <p className="text-sm text-muted-foreground">{ (editForm.service_subcategories?.join(', ') || 'No specializations')}</p>
               </div>
             }
+            isEditing={isEditing}
           >
-            <p className="text-sm text-muted-foreground">Use the "Request Admin Change" button to update your services.</p>
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium">Category</label>
+              <select
+                value={editForm.service_category || ''}
+                onChange={e => {
+                  setEditForm(f => ({ ...f, service_category: e.target.value, service_subcategories: [] }));
+                }}
+                className="border rounded px-2 py-1"
+              >
+                <option value="">Select Category</option>
+                {categories.map(cat => (
+                  <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
+                ))}
+              </select>
+              <label className="block text-sm font-medium">Subcategories</label>
+              <select
+                value={editForm.service_subcategories?.[0] || ''}
+                onChange={e => setEditForm(f => ({ ...f, service_subcategories: [e.target.value] }))}
+                className="border rounded px-2 py-1"
+              >
+                <option value="">Select Subcategory</option>
+                {subcategories.filter(sc => sc.category_id === editForm.service_category).map(sc => (
+                  <option key={sc.subcategory_name} value={sc.subcategory_name}>{sc.subcategory_name}</option>
+                ))}
+              </select>
+            </div>
           </ProfileField>
           <ProfileField icon={<Star size={18} />} label="Rating" value={
             <div className="flex items-center gap-2">
@@ -589,9 +613,6 @@ const Profile: React.FC = () => {
                 ) : (
                   <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
                 )}
-                <Button variant="default" className="bg-gradient-to-r from-blue-500 to-pink-500 text-white font-bold shadow-lg" onClick={() => setGlobalChangeModalOpen(true)}>
-                  Request Admin Change
-                </Button>
               </div>
               {renderProfileDetails()}
             </CardContent>
