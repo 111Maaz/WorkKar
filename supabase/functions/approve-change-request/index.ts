@@ -103,6 +103,16 @@ serve(async (req) => {
       console.error(`CRITICAL: Change for request ${requestId} was applied, but status update failed:`, statusError.message);
     }
 
+    // 5. Update worker status
+    const { error: workerUpdateError } = await supabaseAdmin
+      .from('workers')
+      .update({ is_active: false })
+      .eq('user_id', user_id);
+
+    if (workerUpdateError) {
+      throw new Error(`Failed to update worker status: ${workerUpdateError.message}`);
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/UI/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Report {
   id: string;
@@ -17,6 +18,7 @@ interface Report {
 const PAGE_SIZE = 10;
 
 export default function Reports() {
+  const { user: currentAdmin } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -139,7 +141,19 @@ export default function Reports() {
                       size="sm"
                       variant={report.item_details?.is_active ? 'destructive' : 'default'}
                       onClick={async () => {
+                        // Dismiss or undismiss the reported worker
                         await supabase.from('workers').update({ is_active: !report.item_details?.is_active }).eq('user_id', report.reported_item_id);
+                        // Log the action to admin_actions
+                        if (currentAdmin) {
+                          await supabase.from('admin_actions').insert({
+                            admin_id: currentAdmin.id,
+                            action_type: report.item_details?.is_active ? 'dismiss_worker' : 'undismiss_worker',
+                            target_table: 'workers',
+                            target_id: report.reported_item_id,
+                            details: { report_id: report.id, reason: report.reason },
+                            created_at: new Date().toISOString()
+                          });
+                        }
                         fetchReports();
                       }}
                     >

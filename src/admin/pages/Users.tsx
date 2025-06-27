@@ -4,6 +4,7 @@ import { Button } from '@/components/UI/button';
 import { Input } from '@/components/UI/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface User {
   id: string;
@@ -12,6 +13,7 @@ interface User {
   mobile_number: string;
   is_active: boolean;
   created_at: string;
+  is_admin: boolean;
 }
 
 const PAGE_SIZE = 10;
@@ -28,12 +30,13 @@ export default function Users() {
   const [changeModalOpen, setChangeModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   const { toast } = useToast();
+  const { user: currentAdmin } = useAuth();
 
   const fetchUsers = async () => {
     setLoading(true);
     let query = supabase
       .from('profiles')
-      .select('id, full_name, email, mobile_number, is_active, created_at', { count: 'exact' })
+      .select('id, full_name, email, mobile_number, is_active, created_at, is_admin', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
     if (search) {
@@ -63,9 +66,36 @@ export default function Users() {
 
   const handlePromoteToAdmin = async (user: User) => {
     setPromoting(user.id);
-    await supabase.from('admins').upsert({ id: user.id });
+    await supabase.from('profiles').update({ is_admin: true }).eq('id', user.id);
+    if (currentAdmin) {
+      await supabase.from('admin_actions').insert({
+        admin_id: currentAdmin.id,
+        action_type: 'promote_to_admin',
+        target_table: 'profiles',
+        target_id: user.id,
+        details: { email: user.email },
+        created_at: new Date().toISOString()
+      });
+    }
     setPromoting(null);
     alert(`${user.full_name} is now an admin.`);
+  };
+
+  const handleRemoveAsAdmin = async (user: User) => {
+    setPromoting(user.id);
+    await supabase.from('profiles').update({ is_admin: false }).eq('id', user.id);
+    if (currentAdmin) {
+      await supabase.from('admin_actions').insert({
+        admin_id: currentAdmin.id,
+        action_type: 'remove_as_admin',
+        target_table: 'profiles',
+        target_id: user.id,
+        details: { email: user.email },
+        created_at: new Date().toISOString()
+      });
+    }
+    setPromoting(null);
+    alert(`${user.full_name} is no longer an admin.`);
   };
 
   const handleApprove = async (req: any) => {
@@ -124,9 +154,15 @@ export default function Users() {
                 </td>
                 <td className="px-4 py-2 flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => setSelectedUser(user)}>View</Button>
-                  <Button size="sm" variant="secondary" onClick={() => handlePromoteToAdmin(user)} disabled={promoting === user.id}>
-                    {promoting === user.id ? 'Promoting...' : 'Promote to Admin'}
-                  </Button>
+                  {user.is_admin ? (
+                    <Button size="sm" variant="destructive" onClick={() => handleRemoveAsAdmin(user)} disabled={promoting === user.id}>
+                      {promoting === user.id ? 'Removing...' : 'Remove as Admin'}
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="secondary" onClick={() => handlePromoteToAdmin(user)} disabled={promoting === user.id}>
+                      {promoting === user.id ? 'Promoting...' : 'Promote to Admin'}
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -159,9 +195,15 @@ export default function Users() {
               <Button variant={selectedUser.is_active ? 'destructive' : 'default'} onClick={() => { handleToggleActive(selectedUser); setSelectedUser(null); }}>
                 {selectedUser.is_active ? 'Deactivate' : 'Reactivate'}
               </Button>
-              <Button variant="secondary" onClick={() => { handlePromoteToAdmin(selectedUser); setSelectedUser(null); }}>
-                Promote to Admin
-              </Button>
+              {selectedUser.is_admin ? (
+                <Button size="sm" variant="destructive" onClick={() => handleRemoveAsAdmin(selectedUser)} disabled={promoting === selectedUser.id}>
+                  {promoting === selectedUser.id ? 'Removing...' : 'Remove as Admin'}
+                </Button>
+              ) : (
+                <Button size="sm" variant="secondary" onClick={() => handlePromoteToAdmin(selectedUser)} disabled={promoting === selectedUser.id}>
+                  {promoting === selectedUser.id ? 'Promoting...' : 'Promote to Admin'}
+                </Button>
+              )}
             </div>
           </div>
         </div>
