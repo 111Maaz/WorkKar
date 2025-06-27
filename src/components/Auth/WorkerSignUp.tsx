@@ -94,17 +94,12 @@ const WorkerSignUp: React.FC = () => {
 
   useEffect(() => {
     if (formData.category) {
-      const selectedCat = categories.find(c => c.category_name === formData.category);
-      if (selectedCat) {
-        const filtered = subcategories.filter(sc => sc.category_id === selectedCat.category_id);
-        setFilteredSubcategories(filtered);
-      } else {
-        setFilteredSubcategories([]);
-      }
+      const filtered = subcategories.filter(sc => sc.category_id === formData.category);
+      setFilteredSubcategories(filtered);
     } else {
       setFilteredSubcategories([]);
     }
-  }, [formData.category, categories, subcategories]);
+  }, [formData.category, subcategories]);
 
   const handleLocationSelect = async (coords: [number, number]) => {
     try {
