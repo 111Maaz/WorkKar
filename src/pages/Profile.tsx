@@ -114,6 +114,11 @@ function toWKT(coords) {
   return `POINT(${coords[1]} ${coords[0]})`;
 }
 
+// Utility to validate coordinates
+function isValidCoordinates(coords: any): coords is [number, number] {
+  return Array.isArray(coords) && coords.length === 2 && coords.every(n => typeof n === 'number' && !isNaN(n));
+}
+
 const Profile: React.FC = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
@@ -252,7 +257,7 @@ const Profile: React.FC = () => {
     if (!user || !profile) return;
 
     // Validate location before saving
-    if (!editForm.location_address || !editForm.location_coordinates) {
+    if (!editForm.location_address || !isValidCoordinates(editForm.location_coordinates)) {
       toast({
         title: "Location Required",
         description: "Please select your location on the map or use your current location.",
@@ -266,17 +271,27 @@ const Profile: React.FC = () => {
       const wkt = toWKT(editForm.location_coordinates);
       if ('service_category' in profile) {
         // Worker profile
+        const updateData = {
+          full_name: editForm.full_name,
+          mobile_number: editForm.mobile_number,
+          business_name: editForm.business_name,
+          location_address: editForm.location_address,
+          location_coordinates: wkt,
+          service_category: editForm.service_category,
+          service_subcategories: editForm.service_subcategories,
+        };
+        console.log('Updating worker profile with:', updateData);
+        if (!updateData.location_address || !wkt) {
+          toast({
+            title: "Location Error",
+            description: "Location data is missing or invalid. Please reselect your location.",
+            variant: "destructive"
+          });
+          return;
+        }
         const { error: updateError } = await supabase
           .from('workers')
-          .update({
-            full_name: editForm.full_name,
-            mobile_number: editForm.mobile_number,
-            business_name: editForm.business_name,
-            location_address: editForm.location_address,
-            location_coordinates: wkt,
-            service_category: editForm.service_category,
-            service_subcategories: editForm.service_subcategories,
-          })
+          .update(updateData)
           .eq('user_id', user.id);
         error = updateError;
       } else {
