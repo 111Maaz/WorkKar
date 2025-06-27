@@ -639,7 +639,18 @@ const Profile: React.FC = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    setIsEditing(true);
+                    setEditForm({
+                      ...profile,
+                      location_address: profile.location_address || '',
+                      location_coordinates: Array.isArray(profile.location_coordinates)
+                        ? profile.location_coordinates
+                        : (profile.location_coordinates && profile.location_coordinates.coordinates)
+                          ? profile.location_coordinates.coordinates
+                          : null,
+                    });
+                  }}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
                 )}
               </div>
               {renderProfileDetails()}
