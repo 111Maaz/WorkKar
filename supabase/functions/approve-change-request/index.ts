@@ -50,7 +50,8 @@ serve(async (req) => {
     // 3. Determine if user is a worker or general user and update the correct table
     const { data: worker } = await supabaseAdmin
       .from('workers')
-      .select('id')
+      .select('*')
+      .eq('is_active', true)
       .eq('user_id', user_id)
       .single();
       

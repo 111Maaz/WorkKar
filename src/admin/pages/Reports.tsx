@@ -105,6 +105,7 @@ export default function Reports() {
             <tr>
               <th className="px-4 py-2 text-left">Reporter</th>
               <th className="px-4 py-2 text-left">Type</th>
+              <th className="px-4 py-2 text-left">Reported Worker</th>
               <th className="px-4 py-2 text-left">Reason</th>
               <th className="px-4 py-2 text-left">Status</th>
               <th className="px-4 py-2 text-left">Date</th>
@@ -113,13 +114,16 @@ export default function Reports() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="p-4 text-center">Loading...</td></tr>
+              <tr><td colSpan={7} className="p-4 text-center">Loading...</td></tr>
             ) : reports.length === 0 ? (
-              <tr><td colSpan={6} className="p-4 text-center text-muted-foreground">No reports found.</td></tr>
+              <tr><td colSpan={7} className="p-4 text-center text-muted-foreground">No reports found.</td></tr>
             ) : reports.map(report => (
               <tr key={report.id} className="hover:bg-muted cursor-pointer">
                 <td className="px-4 py-2" onClick={() => setSelectedReport(report)}>{report.reporter_name}</td>
                 <td className="px-4 py-2" onClick={() => setSelectedReport(report)}>{report.reported_item_type}</td>
+                <td className="px-4 py-2" onClick={() => setSelectedReport(report)}>
+                  {report.reported_item_type === 'worker' ? (report.item_details?.full_name || 'Unknown') : '-'}
+                </td>
                 <td className="px-4 py-2" onClick={() => setSelectedReport(report)}>{report.reason}</td>
                 <td className="px-4 py-2">
                   <span className={`px-2 py-1 rounded text-xs ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : report.status === 'reviewed' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{report.status}</span>
@@ -129,6 +133,19 @@ export default function Reports() {
                   <Button size="sm" variant="outline" onClick={() => setSelectedReport(report)}>View</Button>
                   {report.status !== 'reviewed' && <Button size="sm" variant="default" onClick={() => handleStatus(report, 'reviewed')}>Mark Reviewed</Button>}
                   {report.status !== 'resolved' && <Button size="sm" variant="secondary" onClick={() => handleStatus(report, 'resolved')}>Resolve</Button>}
+                  {/* Dismiss/Undismiss button for worker reports */}
+                  {report.reported_item_type === 'worker' && (
+                    <Button
+                      size="sm"
+                      variant={report.item_details?.is_active ? 'destructive' : 'default'}
+                      onClick={async () => {
+                        await supabase.from('workers').update({ is_active: !report.item_details?.is_active }).eq('user_id', report.reported_item_id);
+                        fetchReports();
+                      }}
+                    >
+                      {report.item_details?.is_active ? 'Dismiss' : 'Undismiss'}
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -165,7 +182,18 @@ export default function Reports() {
               {selectedReport.status !== 'resolved' && <Button variant="secondary" onClick={() => { handleStatus(selectedReport, 'resolved'); setSelectedReport(null); }}>Resolve</Button>}
               {/* Admin actions on reported item */}
               {selectedReport.reported_item_type === 'user' && <Button variant="destructive" onClick={() => { handleDeactivateUser(selectedReport.reported_item_id); setSelectedReport(null); }}>Deactivate User</Button>}
-              {selectedReport.reported_item_type === 'worker' && <Button variant="destructive" onClick={() => { handleDeactivateWorker(selectedReport.reported_item_id); setSelectedReport(null); }}>Deactivate Worker</Button>}
+              {selectedReport.reported_item_type === 'worker' && (
+                <Button
+                  variant={selectedReport.item_details?.is_active ? 'destructive' : 'default'}
+                  onClick={async () => {
+                    await supabase.from('workers').update({ is_active: !selectedReport.item_details?.is_active }).eq('user_id', selectedReport.reported_item_id);
+                    setSelectedReport(null);
+                    fetchReports();
+                  }}
+                >
+                  {selectedReport.item_details?.is_active ? 'Dismiss' : 'Undismiss'}
+                </Button>
+              )}
               {selectedReport.reported_item_type === 'review' && <Button variant="destructive" onClick={() => { handleHideReview(selectedReport.reported_item_id); setSelectedReport(null); }}>Hide Review</Button>}
             </div>
           </div>
