@@ -160,17 +160,30 @@ const Index = () => {
     console.log("Initializing page, user:", user);
     // If user is logged in, try to get their location from their profile
     if (user) {
-      const { data: profile, error } = await supabase
-        .from('profiles')
+      // Try to get location from workers table first
+      let locationData = null;
+      let { data: worker, error: workerError } = await supabase
+        .from('workers')
         .select('location_coordinates')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .single();
 
-      if (error) {
-        console.error("Error fetching user profile for location:", error);
-      } else if (profile?.location_coordinates && typeof profile.location_coordinates === 'object') {
-        // Handle GeoJSON Point object from PostgREST
-        const coords = (profile.location_coordinates as any).coordinates;
+      if (worker && worker.location_coordinates && typeof worker.location_coordinates === 'object') {
+        locationData = worker.location_coordinates;
+      } else {
+        // Fallback to profiles table
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('location_coordinates')
+          .eq('id', user.id)
+          .single();
+        if (profile && profile.location_coordinates && typeof profile.location_coordinates === 'object') {
+          locationData = profile.location_coordinates;
+        }
+      }
+
+      if (locationData) {
+        const coords = locationData.coordinates;
         if (coords && coords.length === 2) {
           fetchedUserLocation = { longitude: coords[0], latitude: coords[1] };
         }
