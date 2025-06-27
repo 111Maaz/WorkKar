@@ -66,7 +66,12 @@ export default function Users() {
 
   const handlePromoteToAdmin = async (user: User) => {
     setPromoting(user.id);
-    await supabase.from('profiles').update({ is_admin: true }).eq('id', user.id);
+    const { error } = await supabase.from('profiles').update({ is_admin: true }).eq('id', user.id);
+    if (error) {
+      toast({ title: 'Promotion Failed', description: error.message, variant: 'destructive' });
+      setPromoting(null);
+      return;
+    }
     if (currentAdmin) {
       await supabase.from('admin_actions').insert({
         admin_id: currentAdmin.id,
@@ -78,7 +83,8 @@ export default function Users() {
       });
     }
     setPromoting(null);
-    alert(`${user.full_name} is now an admin.`);
+    toast({ title: 'Promotion Successful', description: `${user.full_name} is now an admin.` });
+    fetchUsers();
   };
 
   const handleRemoveAsAdmin = async (user: User) => {

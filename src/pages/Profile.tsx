@@ -546,7 +546,13 @@ const Profile: React.FC = () => {
             <select
               value={editForm.service_category || ''}
               onChange={e => {
-                setEditForm(f => ({ ...f, service_category: e.target.value, service_subcategories: [] }));
+                setEditForm(f => ({
+                  ...f,
+                  service_category: e.target.value,
+                  service_subcategories: [],
+                  location_address: f.location_address,
+                  location_coordinates: f.location_coordinates,
+                }));
               }}
               className="border rounded px-2 py-1 bg-white text-foreground"
             >

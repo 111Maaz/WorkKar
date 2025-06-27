@@ -9,7 +9,6 @@ const navItems = [
   { label: 'Workers', path: '/admin/workers' },
   { label: 'Reviews', path: '/admin/reviews' },
   { label: 'Reports', path: '/admin/reports' },
-  { label: 'Change Requests', path: '/admin/change-requests' },
   { label: 'Categories', path: '/admin/categories' },
   { label: 'Audit Logs', path: '/admin/audit-log' },
 ];
