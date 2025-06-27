@@ -534,38 +534,40 @@ const Profile: React.FC = () => {
             label="Service" 
             value={
               <div>
-                <p className="font-semibold">{categories.find(c => c.category_id === editForm.service_category)?.category_name || editForm.service_category}</p>
-                <p className="text-sm text-muted-foreground">{ (editForm.service_subcategories?.join(', ') || 'No specializations')}</p>
+                <p className="font-semibold">{categories.find(c => c.category_id === editForm.service_category)?.category_name || <span className="text-muted-foreground">Not set</span>}</p>
+                <p className="text-sm text-muted-foreground">{ (Array.isArray(editForm.service_subcategories) && editForm.service_subcategories.length > 0) ? editForm.service_subcategories.join(', ') : <span className="text-muted-foreground">No specializations</span>}</p>
               </div>
             }
             isEditing={isEditing}
           >
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium">Category</label>
-              <select
-                value={editForm.service_category || ''}
-                onChange={e => {
-                  setEditForm(f => ({ ...f, service_category: e.target.value, service_subcategories: [] }));
-                }}
-                className="border rounded px-2 py-1"
-              >
-                <option value="">Select Category</option>
-                {categories.map(cat => (
-                  <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
-                ))}
-              </select>
-              <label className="block text-sm font-medium">Subcategories</label>
-              <select
-                value={editForm.service_subcategories?.[0] || ''}
-                onChange={e => setEditForm(f => ({ ...f, service_subcategories: [e.target.value] }))}
-                className="border rounded px-2 py-1"
-              >
-                <option value="">Select Subcategory</option>
-                {subcategories.filter(sc => sc.category_id === editForm.service_category).map(sc => (
-                  <option key={sc.subcategory_name} value={sc.subcategory_name}>{sc.subcategory_name}</option>
-                ))}
-              </select>
-            </div>
+            <label className="block text-sm font-medium">Category</label>
+            <select
+              value={editForm.service_category || ''}
+              onChange={e => {
+                setEditForm(f => ({ ...f, service_category: e.target.value, service_subcategories: [] }));
+              }}
+              className="border rounded px-2 py-1 bg-white text-foreground"
+            >
+              <option value="">Select Category</option>
+              {categories.map(cat => (
+                <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
+              ))}
+            </select>
+            <label className="block text-sm font-medium">Subcategories</label>
+            <select
+              multiple
+              value={editForm.service_subcategories || []}
+              onChange={e => {
+                const options = Array.from(e.target.selectedOptions, option => option.value);
+                setEditForm(f => ({ ...f, service_subcategories: options }));
+              }}
+              className="border rounded px-2 py-1 bg-white text-foreground min-h-[40px]"
+            >
+              <option value="">Select Subcategory</option>
+              {subcategories.filter(sc => sc.category_id === editForm.service_category).map(sc => (
+                <option key={sc.subcategory_name} value={sc.subcategory_name}>{sc.subcategory_name}</option>
+              ))}
+            </select>
           </ProfileField>
           <ProfileField icon={<Star size={18} />} label="Rating" value={
             <div className="flex items-center gap-2">

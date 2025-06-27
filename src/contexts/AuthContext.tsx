@@ -61,31 +61,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     if (!error && data.user) {
-      // Create profile or worker record based on user type
+      let insertError = null;
       if (userData.userType === 'skilled_professional') {
-        await supabase.from('workers').insert({
+        console.log('Inserting worker:', {
           user_id: data.user.id,
           full_name: userData.name,
           email: email,
           mobile_number: userData.mobile,
           service_category: userData.category,
-          service_subcategory: userData.subcategory,
+          service_subcategories: userData.subcategories,
           business_name: userData.businessName || null,
           location_address: userData.location?.address,
-          location_coordinates: userData.location ? 
-            `POINT(${userData.location.coordinates[1]} ${userData.location.coordinates[0]})` : null,
+          location_coordinates: userData.location && Array.isArray(userData.location.coordinates)
+            ? `POINT(${userData.location.coordinates[1]} ${userData.location.coordinates[0]})`
+            : null,
         });
+        const { error: workerError } = await supabase.from('workers').insert({
+          user_id: data.user.id,
+          full_name: userData.name,
+          email: email,
+          mobile_number: userData.mobile,
+          service_category: userData.category,
+          service_subcategories: userData.subcategories,
+          business_name: userData.businessName || null,
+          location_address: userData.location?.address,
+          location_coordinates: userData.location && Array.isArray(userData.location.coordinates)
+            ? `POINT(${userData.location.coordinates[1]} ${userData.location.coordinates[0]})`
+            : null,
+        });
+        if (workerError) insertError = workerError;
       } else {
-        await supabase.from('profiles').insert({
+        const { error: profileError } = await supabase.from('profiles').insert({
           id: data.user.id,
           full_name: userData.name,
           email: email,
           mobile_number: userData.mobile,
           user_type: 'general_user',
           location_address: userData.location?.address,
-          location_coordinates: userData.location ? 
-            `POINT(${userData.location.coordinates[1]} ${userData.location.coordinates[0]})` : null,
+          location_coordinates: userData.location && Array.isArray(userData.location.coordinates)
+            ? `POINT(${userData.location.coordinates[1]} ${userData.location.coordinates[0]})`
+            : null,
         });
+        if (profileError) insertError = profileError;
+      }
+      if (insertError) {
+        return { error: insertError };
       }
     }
 

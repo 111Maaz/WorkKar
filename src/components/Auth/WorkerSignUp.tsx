@@ -220,8 +220,7 @@ const WorkerSignUp: React.FC = () => {
         category: validData.category,
         subcategories: validData.subcategories,
         businessName: validData.businessName,
-        location_address: validData.location.address,
-        location_coordinates: toWKT(validData.location.coordinates),
+        location: validData.location,
       });
 
       if (error) {
