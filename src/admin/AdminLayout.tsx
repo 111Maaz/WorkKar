@@ -13,6 +13,14 @@ const navItems = [
   { label: 'Audit Logs', path: '/admin/audit-log' },
 ];
 
+function getCoordinatesArray(coords: any): [number, number] | null {
+  if (Array.isArray(coords) && coords.length === 2) return coords;
+  if (coords && typeof coords === 'object' && Array.isArray(coords.coordinates) && coords.coordinates.length === 2) {
+    return coords.coordinates;
+  }
+  return null;
+}
+
 const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();

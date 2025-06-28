@@ -72,6 +72,13 @@ export default function Users() {
       setPromoting(null);
       return;
     }
+    // Also insert into admins table for admin access
+    const { error: adminError } = await supabase.from('admins').upsert({ id: user.id });
+    if (adminError) {
+      toast({ title: 'Admin Table Error', description: adminError.message, variant: 'destructive' });
+      setPromoting(null);
+      return;
+    }
     if (currentAdmin) {
       await supabase.from('admin_actions').insert({
         admin_id: currentAdmin.id,
@@ -90,6 +97,13 @@ export default function Users() {
   const handleRemoveAsAdmin = async (user: User) => {
     setPromoting(user.id);
     await supabase.from('profiles').update({ is_admin: false }).eq('id', user.id);
+    // Remove from admins table as well
+    const { error: adminError } = await supabase.from('admins').delete().eq('id', user.id);
+    if (adminError) {
+      toast({ title: 'Admin Table Error', description: adminError.message, variant: 'destructive' });
+      setPromoting(null);
+      return;
+    }
     if (currentAdmin) {
       await supabase.from('admin_actions').insert({
         admin_id: currentAdmin.id,
@@ -102,6 +116,7 @@ export default function Users() {
     }
     setPromoting(null);
     alert(`${user.full_name} is no longer an admin.`);
+    fetchUsers();
   };
 
   const handleApprove = async (req: any) => {

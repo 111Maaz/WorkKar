@@ -119,6 +119,15 @@ function isValidCoordinates(coords: any): coords is [number, number] {
   return Array.isArray(coords) && coords.length === 2 && coords.every(n => typeof n === 'number' && !isNaN(n));
 }
 
+// Utility to always get coordinates as [number, number] array
+function getCoordinatesArray(coords: any): [number, number] | null {
+  if (Array.isArray(coords) && coords.length === 2 && typeof coords[0] === 'number' && typeof coords[1] === 'number') return [coords[0], coords[1]];
+  if (coords && typeof coords === 'object' && Array.isArray(coords.coordinates) && coords.coordinates.length === 2 && typeof coords.coordinates[0] === 'number' && typeof coords.coordinates[1] === 'number') {
+    return [coords.coordinates[0], coords.coordinates[1]];
+  }
+  return null;
+}
+
 const Profile: React.FC = () => {
   const { toast } = useToast();
   const { user, signOut } = useAuth();
@@ -256,8 +265,9 @@ const Profile: React.FC = () => {
   const handleSave = async () => {
     if (!user || !profile) return;
 
-    // Validate location before saving
-    if (!editForm.location_address || !isValidCoordinates(editForm.location_coordinates)) {
+    // Always normalize coordinates before saving
+    const coordsArray = getCoordinatesArray(editForm.location_coordinates);
+    if (!editForm.location_address || !isValidCoordinates(coordsArray)) {
       toast({
         title: "Location Required",
         description: "Please select your location on the map or use your current location.",
@@ -268,7 +278,7 @@ const Profile: React.FC = () => {
 
     try {
       let error;
-      const wkt = toWKT(editForm.location_coordinates);
+      const wkt = toWKT(coordsArray);
       if ('service_category' in profile) {
         // Worker profile
         const updateData = {
@@ -665,11 +675,7 @@ const Profile: React.FC = () => {
                     setEditForm({
                       ...profile,
                       location_address: profile.location_address || '',
-                      location_coordinates: Array.isArray(profile.location_coordinates)
-                        ? profile.location_coordinates
-                        : (profile.location_coordinates && profile.location_coordinates.coordinates)
-                          ? profile.location_coordinates.coordinates
-                          : null,
+                      location_coordinates: getCoordinatesArray(profile.location_coordinates) as [number, number] | null,
                     });
                   }}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
                 )}
