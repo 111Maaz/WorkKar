@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Dashboard', path: '/admin' },
   { label: 'Users', path: '/admin/users' },
   { label: 'Workers', path: '/admin/workers' },
+  { label: 'Verification Requests', path: '/admin/verification-requests' },
   { label: 'Reviews', path: '/admin/reviews' },
   { label: 'Reports', path: '/admin/reports' },
   { label: 'Categories', path: '/admin/categories' },

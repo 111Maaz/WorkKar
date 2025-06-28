@@ -5,6 +5,7 @@ import AdminLayout from './AdminLayout';
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Users = React.lazy(() => import('./pages/Users'));
 const Workers = React.lazy(() => import('./pages/Workers'));
+const VerificationRequests = React.lazy(() => import('./pages/VerificationRequests'));
 const Reviews = React.lazy(() => import('./pages/Reviews'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const Categories = React.lazy(() => import('./pages/Categories'));
@@ -19,6 +20,7 @@ export default function AdminRoutes() {
           <Route index element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="workers" element={<Workers />} />
+          <Route path="verification-requests" element={<VerificationRequests />} />
           <Route path="reviews" element={<Reviews />} />
           <Route path="reports" element={<Reports />} />
           <Route path="change-requests" element={<ChangeRequests />} />

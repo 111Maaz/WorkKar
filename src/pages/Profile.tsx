@@ -14,6 +14,7 @@ import BottomNavigation from '@/components/Layout/BottomNavigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
 import { Textarea } from '@/components/UI/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
+import VerificationForm from '@/components/Workers/VerificationForm';
 
 const MapPicker = lazy(() => import('@/components/UI/MapPicker'));
 
@@ -48,6 +49,7 @@ interface WorkerProfile {
   total_reviews: number;
   created_at: string;
   updated_at: string;
+  verification_status: string;
 }
 
 const ProfileField = ({ icon, label, value, isEditing, children }: { icon: React.ReactNode, label: string, value: React.ReactNode, isEditing?: boolean, children?: React.ReactNode }) => (
@@ -151,6 +153,7 @@ const Profile: React.FC = () => {
   const [subcategories, setSubcategories] = useState<{ subcategory_name: string, category_id: string }[]>([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState<{ subcategory_name: string }[]>([]);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
 
   const workerFields = [
     { value: 'email', label: 'Email' },
@@ -670,14 +673,27 @@ const Profile: React.FC = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => {
-                    setIsEditing(true);
-                    setEditForm({
-                      ...profile,
-                      location_address: profile.location_address || '',
-                      location_coordinates: getCoordinatesArray(profile.location_coordinates) as [number, number] | null,
-                    });
-                  }}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
+                  <>
+                    {/* Show verification button only for workers who are not already verified */}
+                    {isWorker && (profile as WorkerProfile).verification_status !== 'approved' && (
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shadow-lg"
+                        onClick={() => setVerificationModalOpen(true)}
+                      >
+                        <Shield className="h-4 w-4 mr-2" /> Become Verified Professional
+                      </Button>
+                    )}
+                    <Button variant="outline" size="sm" onClick={() => {
+                      setIsEditing(true);
+                      setEditForm({
+                        ...profile,
+                        location_address: profile.location_address || '',
+                        location_coordinates: getCoordinatesArray(profile.location_coordinates) as [number, number] | null,
+                      });
+                    }}><Edit className="h-4 w-4 mr-2" /> Edit</Button>
+                  </>
                 )}
               </div>
               {renderProfileDetails()}
@@ -809,6 +825,19 @@ const Profile: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Verification Form Modal */}
+      {isWorker && (
+        <VerificationForm
+          isOpen={verificationModalOpen}
+          onClose={() => setVerificationModalOpen(false)}
+          workerId={(profile as WorkerProfile).id}
+          onSuccess={() => {
+            // Refresh profile data after successful submission
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 };
