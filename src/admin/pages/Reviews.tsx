@@ -29,7 +29,7 @@ export default function Reviews() {
     setLoading(true);
     let query = supabase
       .from('reviews')
-      .select('id, user_id, worker_id, rating, comment, user_name, status, created_at')
+      .select('*, user_id, worker_id, created_at')
       .order('created_at', { ascending: false })
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
     if (status) {
@@ -37,12 +37,17 @@ export default function Reviews() {
     }
     const { data, count } = await query;
     // Fetch reviewer and worker names for display
-    const reviewsWithNames = await Promise.all((data || []).map(async (review: Review) => {
-      let reviewer_name = review.user_name;
+    const reviewsWithNames = await Promise.all((data || []).map(async (review: any) => {
+      let reviewer_name = '';
       let worker_name = '';
-      // Fetch worker name
-      const { data: workerData } = await supabase.from('workers').select('full_name').eq('id', review.worker_id).single();
-      if (workerData) worker_name = workerData.full_name;
+      if (review.user_id) {
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', review.user_id).single();
+        if (profile) reviewer_name = profile.full_name;
+      }
+      if (review.worker_id) {
+        const { data: worker } = await supabase.from('workers').select('full_name').eq('user_id', review.worker_id).single();
+        if (worker) worker_name = worker.full_name;
+      }
       return { ...review, reviewer_name, worker_name };
     }));
     setReviews(reviewsWithNames);
@@ -56,7 +61,11 @@ export default function Reviews() {
   }, [status, page]);
 
   const handleStatus = async (review: Review, newStatus: string) => {
-    await supabase.from('reviews').update({ status: newStatus }).eq('id', review.id);
+    const { error } = await supabase.from('reviews').update({ status: newStatus }).eq('id', review.id);
+    if (error) {
+      alert('Failed to update review status: ' + error.message);
+      return;
+    }
     fetchReviews();
   };
 

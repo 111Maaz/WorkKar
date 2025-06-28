@@ -100,6 +100,7 @@ const WorkerProfilePage = () => {
         .from('reviews')
         .select(`*, author:profiles(id, full_name, avatar_url)`)
         .eq('worker_id', id)
+        .eq('status', 'visible')
         .order('created_at', { ascending: false });
 
       if (reviewsError) throw reviewsError;

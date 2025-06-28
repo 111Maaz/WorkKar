@@ -24,6 +24,7 @@ const Index = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [sortBy, setSortBy] = useState<string>('distance'); // default sort by distance
 
   // Haversine formula for distance calculation
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -305,6 +306,22 @@ const Index = () => {
     }, 100);
   };
 
+  // Sorting logic for filteredWorkers
+  useEffect(() => {
+    let sorted = [...filteredWorkers];
+    if (sortBy === 'rating') {
+      sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    } else if (sortBy === 'distance') {
+      sorted.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+    }
+    setFilteredWorkers(sorted);
+    // eslint-disable-next-line
+  }, [sortBy]);
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+  };
+
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       {isOffline && (
@@ -323,6 +340,8 @@ const Index = () => {
           onClearFilters={handleClearFilters}
           onRefresh={() => initializePage()} // Re-run the whole init process on refresh
           onDistanceClick={handleDistanceClick}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
         />
       </main>
       <Footer />
