@@ -45,7 +45,7 @@ export default function Reviews() {
         if (profile) reviewer_name = profile.full_name;
       }
       if (review.worker_id) {
-        const { data: worker } = await supabase.from('workers').select('full_name').eq('user_id', review.worker_id).single();
+        const { data: worker } = await supabase.from('workers').select('full_name').eq('id', review.worker_id).single();
         if (worker) worker_name = worker.full_name;
       }
       return { ...review, reviewer_name, worker_name };
