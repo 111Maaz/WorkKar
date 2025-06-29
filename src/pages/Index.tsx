@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import Navbar from '@/components/Layout/Navbar';
-import Footer from '@/components/Layout/Footer';
 import Hero from '@/components/Home/Hero';
 import CategorySelector from '@/components/Home/CategorySelector';
 import WorkerList from '@/components/Workers/WorkerList';
@@ -218,26 +216,6 @@ const Index = () => {
     initializePage();
   }, [initializePage]);
 
-  // Focus search bar if focusSearch param is present
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('focusSearch') && searchInputRef.current) {
-      setTimeout(() => {
-        searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        searchInputRef.current?.focus();
-      }, 300);
-    }
-  }, [location.search]);
-
-  // Listen for location updates from profile page
-  useEffect(() => {
-    const handleLocationUpdated = () => {
-      initializePage();
-    };
-    window.addEventListener('locationUpdated', handleLocationUpdated);
-    return () => window.removeEventListener('locationUpdated', handleLocationUpdated);
-  }, [initializePage]);
-
   // Handle search functionality
   const handleSearch = (query: string, location: string) => {
     const queryLower = query.trim().toLowerCase();
@@ -329,7 +307,6 @@ const Index = () => {
           You are offline. Some features may be unavailable.
         </div>
       )}
-      <Navbar />
       <main className="flex-grow">
         <Hero onSearch={handleSearch} ref={heroRef} inputRef={searchInputRef} />
         <CategorySelector categories={categories} onSelectCategory={handleCategorySelect} />
@@ -344,7 +321,6 @@ const Index = () => {
           onSortChange={handleSortChange}
         />
       </main>
-      <Footer />
       <BottomNavigation onSearchClick={handleSearchClick} />
     </div>
   );
