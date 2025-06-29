@@ -3,7 +3,7 @@ import { Toaster } from "@/components/UI/toaster";
 import { Toaster as Sonner } from "@/components/UI/sonner";
 import { TooltipProvider } from "@/components/UI/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/components/Layout/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
@@ -18,6 +18,34 @@ import Footer from '@/components/Layout/Footer';
 import WelcomeModal from '@/components/UI/WelcomeModal';
 
 const queryClient = new QueryClient();
+
+function AppRoutes({ handleShowHelp, handleResetWelcome, showWelcomeModal, setShowWelcomeModal }) {
+  const location = useLocation();
+  const showNavbar = location.pathname === "/";
+
+  return (
+    <>
+      {showNavbar && <Navbar onShowHelp={handleShowHelp} />}
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/worker/:id" element={<WorkerProfilePage />} />
+        <Route path="/admin/*" element={
+          <ProtectedRoute>
+            <AdminRoutes />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Footer onResetWelcome={handleResetWelcome} />
+      <WelcomeModal 
+        isOpen={showWelcomeModal} 
+        onClose={() => setShowWelcomeModal(false)} 
+      />
+    </>
+  );
+}
 
 const App = () => {
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -46,24 +74,11 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Navbar onShowHelp={handleShowHelp} />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/worker/:id" element={<WorkerProfilePage />} />
-                <Route path="/admin/*" element={
-                  <ProtectedRoute>
-                    <AdminRoutes />
-                  </ProtectedRoute>
-                } />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Footer onResetWelcome={handleResetWelcome} />
-              <WelcomeModal 
-                isOpen={showWelcomeModal} 
-                onClose={() => setShowWelcomeModal(false)} 
+              <AppRoutes
+                handleShowHelp={handleShowHelp}
+                handleResetWelcome={handleResetWelcome}
+                showWelcomeModal={showWelcomeModal}
+                setShowWelcomeModal={setShowWelcomeModal}
               />
             </BrowserRouter>
           </TooltipProvider>

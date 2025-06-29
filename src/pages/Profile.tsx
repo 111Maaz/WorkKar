@@ -644,6 +644,12 @@ const Profile: React.FC = () => {
     <div className="relative container mx-auto px-0 py-8 max-w-4xl overflow-visible">
       {/* Background image (outermost) */}
       <div className="absolute inset-0 bg-center bg-cover opacity-20 pointer-events-none z-0" style={{ backgroundImage: 'url(/WorkKar BG.jpg)' }} />
+      {/* Back button for all devices */}
+      <div className="px-4 pt-2 pb-2 flex items-center z-10">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+      </div>
       <div className="container mx-auto px-4 py-12 flex justify-center">
         <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
           <Card className="overflow-hidden shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">

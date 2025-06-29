@@ -118,6 +118,10 @@ const WorkerProfilePage = () => {
     fetchWorkerData();
   }, [id]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [id]);
+
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !worker) return;

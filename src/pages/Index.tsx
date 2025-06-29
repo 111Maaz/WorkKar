@@ -163,29 +163,40 @@ const Index = () => {
       let locationData = null;
       let { data: worker, error: workerError } = await supabase
         .from('workers')
-        .select('location_coordinates')
+        .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (worker && worker.location_coordinates && typeof worker.location_coordinates === 'object') {
-        locationData = worker.location_coordinates;
+      if (worker && worker.location_coordinates) {
+        // location_coordinates is a PostGIS geometry object
+        // Try to extract coordinates if possible
+        let coords = null;
+        if (typeof worker.location_coordinates === 'object' && worker.location_coordinates.coordinates) {
+          coords = worker.location_coordinates.coordinates;
+        } else if (typeof worker.location_coordinates === 'string') {
+          // If it's WKT, you may need to parse it, but for now skip
+          coords = null;
+        }
+        if (coords && coords.length === 2) {
+          locationData = { longitude: coords[0], latitude: coords[1] };
+        }
       } else {
         // Fallback to profiles table
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('location_coordinates')
+          .select('*')
           .eq('id', user.id)
           .single();
-        if (profile && profile.location_coordinates && typeof profile.location_coordinates === 'object') {
-          locationData = profile.location_coordinates;
+        if (profile && profile.location_coordinates && typeof profile.location_coordinates === 'object' && profile.location_coordinates.coordinates) {
+          const coords = profile.location_coordinates.coordinates;
+          if (coords && coords.length === 2) {
+            locationData = { longitude: coords[0], latitude: coords[1] };
+          }
         }
       }
 
       if (locationData) {
-        const coords = locationData.coordinates;
-        if (coords && coords.length === 2) {
-          fetchedUserLocation = { longitude: coords[0], latitude: coords[1] };
-        }
+        fetchedUserLocation = locationData;
       }
     }
 
