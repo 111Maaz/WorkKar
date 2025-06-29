@@ -641,12 +641,9 @@ const Profile: React.FC = () => {
   );
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 min-h-screen w-full">
-      {isOffline && (
-        <div className="bg-yellow-200 text-yellow-900 text-center py-2 font-semibold">
-          You are offline. Some features may be unavailable.
-        </div>
-      )}
+    <div className="relative container mx-auto px-0 py-8 max-w-4xl overflow-visible">
+      {/* Background image (outermost) */}
+      <div className="absolute inset-0 bg-center bg-cover opacity-20 pointer-events-none z-0" style={{ backgroundImage: 'url(/WorkKar BG.jpg)' }} />
       <div className="container mx-auto px-4 py-12 flex justify-center">
         <div className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl">
           <Card className="overflow-hidden shadow-xl rounded-2xl bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
@@ -696,7 +693,13 @@ const Profile: React.FC = () => {
                   </>
                 )}
               </div>
-              {renderProfileDetails()}
+              {/* Profile Info Section */}
+              <div className="relative rounded-2xl shadow-lg overflow-hidden mt-6">
+                {/* Profile info content with thin outline */}
+                <div className="relative z-10 p-8 rounded-2xl border border-gray-300 dark:border-gray-700">
+                  {renderProfileDetails()}
+                </div>
+              </div>
             </CardContent>
             <CardFooter className="p-4 border-t">
                 <Button 
