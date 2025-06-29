@@ -218,11 +218,16 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
 
           {formData.documentType === 'aadhar' ? (
             /* Aadhar Card Form */
-            <Card>
-              <CardHeader>
+            <Card className="relative overflow-hidden">
+              {/* Background Aadhaar image */}
+              <div
+                className="absolute inset-0 z-0 bg-center bg-no-repeat bg-contain opacity-10 pointer-events-none"
+                style={{ backgroundImage: 'url(/Aadhaar_Logo.png)' }}
+              />
+              <CardHeader className="relative z-10">
                 <CardTitle className="text-lg">Aadhar Card Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 relative z-10">
                 <div>
                   <Label htmlFor="aadharName">Full Name *</Label>
                   <Input
@@ -303,11 +308,16 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
             </Card>
           ) : (
             /* PAN Card Form */
-            <Card>
-              <CardHeader>
+            <Card className="relative overflow-hidden">
+              {/* Background PAN image */}
+              <div
+                className="absolute inset-0 z-0 bg-center bg-no-repeat bg-contain opacity-10 pointer-events-none"
+                style={{ backgroundImage: 'url(/Pan.jpeg)' }}
+              />
+              <CardHeader className="relative z-10">
                 <CardTitle className="text-lg">PAN Card Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 relative z-10">
                 <div>
                   <Label htmlFor="panName">Full Name *</Label>
                   <Input
