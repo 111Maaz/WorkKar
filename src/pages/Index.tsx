@@ -66,7 +66,7 @@ const Index = () => {
         }
       }
       const { data, error } = await supabase
-        .from('workers')
+        .from('workers_with_geojson')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
@@ -79,12 +79,9 @@ const Index = () => {
           let latitude: number | undefined;
           let longitude: number | undefined;
           
-          if (worker.location_coordinates && typeof worker.location_coordinates === 'object') {
-            const coords = (worker.location_coordinates as any).coordinates;
-            if (coords && coords.length === 2) {
-              longitude = coords[0];
-              latitude = coords[1];
-            }
+          if (worker.location_coordinates_geojson && Array.isArray(worker.location_coordinates_geojson.coordinates)) {
+            longitude = worker.location_coordinates_geojson.coordinates[0];
+            latitude = worker.location_coordinates_geojson.coordinates[1];
           }
 
           const distance = (userLocation && typeof latitude === 'number' && typeof longitude === 'number')
@@ -155,55 +152,48 @@ const Index = () => {
 
   const initializePage = useCallback(async () => {
     let fetchedUserLocation: { latitude: number, longitude: number } | null = null;
-    
-    console.log("Initializing page, user:", user);
-    // If user is logged in, try to get their location from their profile
-    if (user) {
-      // Try to get location from workers table first
-      let locationData = null;
-      let { data: worker, error: workerError } = await supabase
-        .from('workers')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
 
-      if (worker && worker.location_coordinates) {
-        // location_coordinates is a PostGIS geometry object
-        // Try to extract coordinates if possible
-        let coords = null;
-        if (typeof worker.location_coordinates === 'object' && worker.location_coordinates.coordinates) {
-          coords = worker.location_coordinates.coordinates;
-        } else if (typeof worker.location_coordinates === 'string') {
-          // If it's WKT, you may need to parse it, but for now skip
-          coords = null;
-        }
-        if (coords && coords.length === 2) {
-          locationData = { longitude: coords[0], latitude: coords[1] };
-        }
-      } else {
-        // Fallback to profiles table
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
+    if (user) {
+      // 1. Try to fetch from profile (Supabase)
+      let locationData = null;
+      try {
+        let { data: worker, error: workerError } = await supabase
+          .from('workers_with_geojson')
           .select('*')
-          .eq('id', user.id)
+          .eq('user_id', user.id)
           .single();
-        if (profile && profile.location_coordinates && typeof profile.location_coordinates === 'object' && profile.location_coordinates.coordinates) {
-          const coords = profile.location_coordinates.coordinates;
-          if (coords && coords.length === 2) {
-            locationData = { longitude: coords[0], latitude: coords[1] };
+        if (worker && worker.location_coordinates_geojson && Array.isArray(worker.location_coordinates_geojson.coordinates)) {
+          locationData = {
+            longitude: worker.location_coordinates_geojson.coordinates[0],
+            latitude: worker.location_coordinates_geojson.coordinates[1]
+          };
+        } else {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles_with_geojson')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          if (profile && profile.location_coordinates_geojson && Array.isArray(profile.location_coordinates_geojson.coordinates)) {
+            locationData = {
+              longitude: profile.location_coordinates_geojson.coordinates[0],
+              latitude: profile.location_coordinates_geojson.coordinates[1]
+            };
           }
         }
+      } catch (e) {
+        console.log('Error fetching profile location:', e);
       }
-
       if (locationData) {
+        console.log('Using profile location:', locationData);
         fetchedUserLocation = locationData;
+      } else {
+        console.log('No profile location found, will try browser/device location');
       }
     }
 
-    // If no DB location, try browser geolocation as a fallback
+    // 2. Only if profile location is missing, use device location
     if (!fetchedUserLocation && navigator.geolocation) {
       try {
-        console.log("Attempting to get location from browser geolocation.");
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
         });
@@ -211,13 +201,12 @@ const Index = () => {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
-        console.log("Got location from browser:", fetchedUserLocation);
+        console.log('Using browser/device location:', fetchedUserLocation);
       } catch (err) {
-          console.warn('Could not get browser location:', err);
+        console.warn('Could not get browser/device location:', err);
       }
     }
-    
-    console.log("Final userLocation to be set:", fetchedUserLocation);
+
     setUserLocation(fetchedUserLocation);
     await fetchAndProcessWorkers(fetchedUserLocation);
   }, [fetchAndProcessWorkers, user]);

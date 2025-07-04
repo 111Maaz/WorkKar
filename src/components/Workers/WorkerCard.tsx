@@ -148,23 +148,30 @@ const WorkerCard: React.FC<WorkerCardProps> = ({ worker, className, userLocation
             </div>
             <p className="text-muted-foreground text-sm font-medium">{worker.category}</p>
             <div className="flex items-center gap-2 mt-1">
-              <RatingStars rating={worker.rating} size={16} />
-              <span className="text-xs text-muted-foreground">({worker.numReviews} reviews)</span>
+              {/* Show a single star icon and the average rating as a float */}
+              <span className="flex items-center text-yellow-500 font-medium text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" width="16" height="16" className="mr-1"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.454a1 1 0 00-1.175 0l-3.38 2.454c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z"/></svg>
+                {typeof worker.average_rating === 'number' ? worker.average_rating.toFixed(1) : worker.rating.toFixed(1)}
+              </span>
             </div>
             <p className="text-muted-foreground text-xs mt-1">{worker.tags.join(', ')}</p>
           </div>
         </div>
         
         <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin size={14} />
+            {/* Show location_address if available, then distance */}
+            {worker.location_address && (
+              <span className="truncate max-w-[120px]" title={worker.location_address}>{worker.location_address}</span>
+            )}
             {userLocation == null ? (
               <button onClick={handleKnowDistanceClick} className="text-primary hover:underline font-medium text-left">
                 Know the distance
               </button>
             ) : (worker.location && worker.location.latitude && worker.location.longitude ? (
               typeof worker.distance === 'number' ? (
-                <span>{`${worker.distance.toFixed(1)} km away`}</span>
+                <span>{`${worker.distance.toFixed(1)} km`}</span>
               ) : (
                 <span>Location not available</span>
               )

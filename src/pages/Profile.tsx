@@ -200,9 +200,9 @@ const Profile: React.FC = () => {
             return;
           }
         }
-        // Try to fetch from profiles table first
+        // Try to fetch from profiles_with_geojson view first
         let { data: profileData, error: profileError } = await supabase
-          .from('profiles')
+          .from('profiles_with_geojson')
           .select('*')
           .eq('id', user.id)
           .single();
@@ -212,9 +212,9 @@ const Profile: React.FC = () => {
           setEditForm(profileData);
           localStorage.setItem('profile', JSON.stringify(profileData));
         } else {
-          // If not in profiles, try workers table
+          // If not in profiles, try workers_with_geojson view
           let { data: workerData, error: workerError } = await supabase
-            .from('workers')
+            .from('workers_with_geojson')
             .select('*')
             .eq('user_id', user.id)
             .single();
@@ -529,17 +529,18 @@ const Profile: React.FC = () => {
       </ProfileField>
       <ProfileField icon={<MapPin size={18} />} label="Location" value={profile.location_address} isEditing={isEditing}>
         <div className="flex flex-col gap-2">
-            <p className="text-sm p-3 border rounded-md min-h-[40px]">
+            <p className="text-xs p-2 border rounded-md min-h-[32px] leading-tight break-words whitespace-pre-line">
                 {editForm.location_address || <span className="text-muted-foreground">No address selected</span>}
             </p>
             <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
                 onClick={() => setIsMapOpen(true)}
-                className="flex-grow"
+                className="flex-grow px-2 py-1"
               >
-                <MapPin size={16} className="mr-2" />
+                <MapPin size={14} className="mr-2" />
                 Change on Map
               </Button>
                <Button
@@ -548,8 +549,9 @@ const Profile: React.FC = () => {
                 size="icon"
                 onClick={handleUseCurrentLocation}
                 aria-label="Use my current location"
+                className="min-w-[36px] min-h-[36px]"
               >
-                <LocateFixed size={16} />
+                <LocateFixed size={14} />
               </Button>
             </div>
         </div>
@@ -664,8 +666,8 @@ const Profile: React.FC = () => {
                 <Mail size={14} /> {profile.email}
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="mb-4 flex justify-end gap-2">
+            <CardContent className="p-3 sm:p-4">
+              <div className="mb-2 flex justify-end gap-2">
                 {isEditing ? (
                   <>
                     <Button variant="outline" size="sm" onClick={() => { setIsEditing(false); setEditForm(profile); }}>
@@ -700,9 +702,9 @@ const Profile: React.FC = () => {
                 )}
               </div>
               {/* Profile Info Section */}
-              <div className="relative rounded-2xl shadow-lg overflow-hidden mt-6">
+              <div className="relative rounded-2xl shadow-lg overflow-hidden mt-3">
                 {/* Profile info content with thin outline */}
-                <div className="relative z-10 p-8 rounded-2xl border border-gray-300 dark:border-gray-700">
+                <div className="relative z-10 p-3 sm:p-5 rounded-2xl border border-gray-300 dark:border-gray-700">
                   {renderProfileDetails()}
                 </div>
               </div>

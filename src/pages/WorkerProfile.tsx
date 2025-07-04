@@ -87,7 +87,7 @@ const WorkerProfilePage = () => {
     try {
       // Fetch worker details
       const { data: workerData, error: workerError } = await supabase
-        .from('workers')
+        .from('workers_with_geojson')
         .select('*')
         .eq('id', id)
         .single();
