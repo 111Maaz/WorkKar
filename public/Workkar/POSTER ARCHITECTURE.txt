@@ -1,0 +1,39 @@
+┌──────────────────────────────────────────────┐
+│        [1] HEADER: Title, Logo, Tagline      │
+│  - WorkKar | Empowering Local Workers        │
+│  - Logo on left, text on right or center     │
+└──────────────────────────────────────────────┘
+
+┌────────────────────────────┬────────────────────────────┐
+│ [2A] Problem Side          │ [2B] Our Solution           │
+│ - Commissions              │ - Zero-commission model     │
+│ - Platform control         │ - Worker autonomy           │
+│ - No local targeting       │ - Localized matching        │
+└────────────────────────────┴────────────────────────────┘
+
+┌──────────────────────────────────────────────┐
+│ [3] HOW WORKKAR WORKS (Main flow chart)       │
+│ - Customer → Search → Book → Rate             │
+│ - Worker → Signup → Verified → Serve          │
+│ - Admin → Approve → Moderate → Insights       │
+│ - Use icons/arrows                             │
+└──────────────────────────────────────────────┘
+
+┌────────────────────────────┬────────────────────────────┐
+│ [4A] Tech Stack            │ [4B] System Architecture    │
+│ - React, TS, Supabase      │ - Diagram: frontend ↔ DB    │
+│ - Capacitor, PostgreSQL    │ - Admin panel ↔ backend     │
+└────────────────────────────┴────────────────────────────┘
+
+┌────────────────────────────┬────────────────────────────┐
+│ [5A] Features              │ [5B] Platform Comparison     │
+│ - Direct chat              │ - WorkKar vs UrbanCompany    │
+│ - Ratings/Reviews          │ - 0% vs 30% commissions       │
+│ - Verified workers         │ - Worker autonomy explained  │
+└────────────────────────────┴────────────────────────────┘
+
+┌────────────────────────────┬────────────────────────────┐
+│ [6A] Monetization Plan     │ [6B] Future Scope + QR Code │
+│ - Area-based ads (shops)   │ - Job wallet, insights       │
+│ - Featured vendors         │ - QR to live site/app demo   │
+└────────────────────────────┴────────────────────────────┘

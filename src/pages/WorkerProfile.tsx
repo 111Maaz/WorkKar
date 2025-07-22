@@ -6,7 +6,7 @@ import RatingStars from '@/components/UI/RatingStars';
 import { Button } from '@/components/UI/button';
 import { Textarea } from '@/components/UI/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/UI/card';
-import { MapPin, Phone, Star, Briefcase, Mail, Building, Send, ChevronLeft, Flag } from 'lucide-react';
+import { MapPin, Phone, Star, Briefcase, Mail, Building, Send, ChevronLeft, Flag, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/UI/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/Layout/BottomNavigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/UI/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/UI/dialog';
+import VerificationForm from '@/components/Workers/VerificationForm';
 
 const WorkerProfileSkeleton = () => (
   <div className="container mx-auto p-4 md:p-8">
@@ -78,6 +79,7 @@ const WorkerProfilePage = () => {
   const [submittingReport, setSubmittingReport] = useState(false);
 
   const [otherReason, setOtherReason] = useState('');
+  const [verificationModalOpen, setVerificationModalOpen] = useState(false);
 
   const fetchWorkerData = async () => {
     if (!id) return;
@@ -87,7 +89,7 @@ const WorkerProfilePage = () => {
     try {
       // Fetch worker details
       const { data: workerData, error: workerError } = await supabase
-        .from('workers_with_geojson')
+        .from('workers')
         .select('*')
         .eq('id', id)
         .single();
@@ -352,6 +354,18 @@ const WorkerProfilePage = () => {
                             Hire Me
                         </Button>
                       </a>
+                      {/* Show verification button only for workers viewing their own profile who are not already verified */}
+                      {user && user.id === worker.user_id && worker.verification_status !== 'approved' && (
+                        <div className="mt-3">
+                          <Button 
+                            variant="default" 
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold shadow-lg"
+                            onClick={() => setVerificationModalOpen(true)}
+                          >
+                            <Shield className="h-4 w-4 mr-2" /> Become Verified Professional
+                          </Button>
+                        </div>
+                      )}
                   </CardContent>
               </Card>
           </div>
@@ -396,6 +410,23 @@ const WorkerProfilePage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Verification Form Modal */}
+      {user && user.id === worker.user_id && (
+        <VerificationForm
+          isOpen={verificationModalOpen}
+          onClose={() => setVerificationModalOpen(false)}
+          workerId={worker.id}
+          onSuccess={() => {
+            // Refresh worker data after successful submission
+            fetchWorkerData();
+            toast({
+              title: "Verification Request Submitted!",
+              description: "Your verification request has been submitted successfully. We'll review it and get back to you soon.",
+            });
+          }}
+        />
+      )}
     </div>
   );
 };
